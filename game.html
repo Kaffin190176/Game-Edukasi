@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Sortir Karier: Rentan atau Aman dari AI?</title>
+<style>
+  :root{
+    --navy:#1B1F3B;
+    --navy2:#262C52;
+    --navy3:#333a6b;
+    --cyan:#00C2CB;
+    --cyan-dim: rgba(0,194,203,0.18);
+    --orange:#FF6B35;
+    --orange-dim: rgba(255,107,53,0.18);
+    --off:#F7F8FC;
+    --ink:#1B1F3B;
+    --muted:#6B7080;
+    --card-border:#E4E7F1;
+    --good:#20C776;
+    --bad:#FF5C5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(circle at 15% 10%, #232a55 0%, var(--navy) 45%, #14172c 100%);
+    color:#fff;
+    overflow-x:hidden;
+  }
+  .app{
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center;
+    padding: 22px 16px 40px;
+  }
+  .decor{
+    position:fixed; border-radius:50%; filter:blur(2px); pointer-events:none; z-index:0;
+    opacity:0.5;
+  }
+  .decor.d1{ width:340px; height:340px; background:var(--cyan-dim); top:-140px; right:-100px; }
+  .decor.d2{ width:260px; height:260px; background:var(--orange-dim); bottom:-100px; left:-90px; }
+
+  header{
+    width:100%; max-width:720px; text-align:center; z-index:1; margin-bottom: 8px;
+  }
+  .eyebrow{
+    letter-spacing:3px; font-size:12px; font-weight:700; color:var(--cyan);
+    text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family: 'Cambria', Georgia, serif;
+    font-size: clamp(24px, 5vw, 34px);
+    margin: 0 0 6px;
+    line-height:1.15;
+  }
+  .sub{
+    color:#C7CCE6; font-size:14px; max-width:520px; margin:0 auto;
+    line-height:1.5;
+  }
+
+  .hud{
+    width:100%; max-width:520px; display:flex; align-items:center; gap:14px;
+    margin: 18px 0 6px; z-index:1;
+  }
+  .progress-track{
+    flex:1; height:8px; background:var(--navy2); border-radius:8px; overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; width:0%; background:linear-gradient(90deg, var(--cyan), var(--orange));
+    border-radius:8px; transition: width .35s ease;
+  }
+  .score-pill{
+    background:var(--navy2); border:1px solid #3a4278; padding:6px 14px; border-radius:20px;
+    font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .score-pill span{ color:var(--cyan); }
+
+  .stage{
+    position:relative; width:100%; max-width:520px; height:300px;
+    margin: 18px 0 14px; z-index:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .zone-hint{
+    position:absolute; top:0; bottom:0; width:34%;
+    border-radius:20px; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:6px; opacity:0; transition:opacity .15s ease;
+    pointer-events:none; font-weight:700; font-size:13px; text-align:center; padding:8px;
+  }
+  .zone-hint.left{ left:0; background:linear-gradient(90deg, rgba(255,92,92,0.28), transparent); color:#ffb3b3;}
+  .zone-hint.right{ right:0; background:linear-gradient(-90deg, rgba(32,199,118,0.28), transparent); color:#9CFFCB;}
+  .zone-hint .icon{ font-size:26px; }
+
+  .card{
+    position:absolute; width: 250px; height: 280px;
+    background: linear-gradient(160deg, #ffffff, #f1f3fb);
+    border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding: 20px;
+    color: var(--ink);
+    cursor: grab;
+    user-select:none;
+    touch-action: none;
+    transition: transform .28s cubic-bezier(.2,.9,.3,1.2), opacity .28s ease, box-shadow .2s ease;
+    will-change: transform;
+  }
+  .card:active{ cursor:grabbing; }
+  .card .emoji{
+    font-size: 76px; margin-bottom: 14px;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));
+  }
+  .card .job-title{
+    font-family:'Cambria', Georgia, serif;
+    font-size: 19px; font-weight:700; text-align:center; line-height:1.25;
+  }
+  .card .job-num{
+    position:absolute; top:14px; left:16px; font-size:11px; color:var(--muted); font-weight:700;
+  }
+  .card.behind1{ transform: translateY(14px) scale(.95); opacity:.55; z-index:1; }
+  .card.behind2{ transform: translateY(26px) scale(.90); opacity:.3; z-index:0; }
+  .card.front{ z-index:2; }
+
+  .flash{
+    position:absolute; inset:0; border-radius:22px; display:flex; align-items:center; justify-content:center;
+    font-size:44px; opacity:0; pointer-events:none; z-index:3; font-weight:900;
+  }
+
+  .explain{
+    max-width:480px; min-height: 46px; text-align:center; font-size:13.5px; color:#C7CCE6;
+    z-index:1; padding: 0 12px; line-height:1.5;
+  }
+  .explain b{ color:#fff; }
+  .explain.good b{ color: var(--good); }
+  .explain.bad b{ color: var(--bad); }
+
+  .controls{
+    display:flex; gap:14px; width:100%; max-width:520px; margin-top: 14px; z-index:1;
+  }
+  .btn{
+    flex:1; border:none; border-radius:16px; padding:16px 10px; font-size:14px; font-weight:700;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;
+    transition: transform .12s ease, filter .12s ease;
+    font-family: inherit;
+  }
+  .btn:active{ transform: scale(.96); }
+  .btn .big{ font-size:20px; }
+  .btn.rentan{ background: linear-gradient(135deg, #ff8161, var(--orange)); color:#fff; }
+  .btn.aman{ background: linear-gradient(135deg, #37e0a8, var(--good)); color:#08331f; }
+  .btn:disabled{ opacity:.4; cursor:default; }
+
+  .hint-row{
+    margin-top:10px; font-size:11.5px; color:#8890B5; z-index:1; text-align:center;
+  }
+
+  .next-btn{
+    margin-top: 12px; z-index:1;
+    background: linear-gradient(135deg, var(--cyan), #0a9aa1); color:#fff; border:none;
+    padding:11px 30px; border-radius:24px; font-size:14px; font-weight:700; cursor:pointer;
+    box-shadow: 0 8px 18px rgba(0,194,203,0.35);
+    animation: pulseIn .3s ease;
+  }
+  .next-btn:active{ transform:scale(.96); }
+  @keyframes pulseIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* Results screen */
+  .results{
+    display:none; flex-direction:column; align-items:center; width:100%; max-width:560px; z-index:1;
+    animation: fadeUp .4s ease;
+  }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
+  .score-big{
+    font-family:'Cambria', Georgia, serif; font-size: 54px; font-weight:900; margin: 10px 0 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--orange));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .score-label{ color:#C7CCE6; font-size:14px; margin-bottom: 18px;}
+  .tier-msg{
+    font-size:16px; font-weight:700; text-align:center; margin-bottom:22px; max-width:420px; line-height:1.4;
+  }
+  .review{
+    width:100%; background:var(--navy2); border-radius:16px; padding:16px; margin-bottom:20px;
+    max-height:260px; overflow-y:auto;
+  }
+  .review-title{ font-size:12px; text-transform:uppercase; letter-spacing:1.5px; color:#8890B5; margin-bottom:10px; font-weight:700;}
+  .review-item{
+    display:flex; align-items:center; gap:10px; padding:7px 4px; font-size:13px;
+    border-bottom: 1px solid #333a6b;
+  }
+  .review-item:last-child{ border-bottom:none; }
+  .review-item .rmark{ width:20px; text-align:center; font-weight:900; }
+  .review-item.correct .rmark{ color: var(--good); }
+  .review-item.wrong .rmark{ color: var(--bad); }
+  .review-item .rlabel{ flex:1; }
+  .review-item .rtag{ font-size:10.5px; color:#8890B5; }
+
+  .replay-btn{
+    background: linear-gradient(135deg, var(--cyan), #0a9aa1); color:#fff; border:none;
+    padding:14px 32px; border-radius:30px; font-size:15px; font-weight:700; cursor:pointer;
+    box-shadow: 0 10px 24px rgba(0,194,203,0.35);
+  }
+  .replay-btn:active{ transform:scale(.97); }
+
+  @media (max-width:400px){
+    .card{ width:210px; height:250px; }
+    .card .emoji{ font-size:60px; }
+    .card .job-title{ font-size:16px; }
+    .stage{ height:270px; }
+  }
+
+  /* ---- Start overlay ---- */
+  #startOverlay{
+    position:fixed; inset:0; z-index:100;
+    background: radial-gradient(circle at 30% 20%, #2a3266 0%, #14172c 70%);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+  #startOverlay.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .start-card{
+    max-width:440px; width:100%; background:var(--navy2); border:1px solid #3a4278;
+    border-radius:24px; padding:34px 28px; text-align:center;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  }
+  .start-card .emoji-row{ font-size:40px; margin-bottom:6px; letter-spacing:8px; }
+  .start-card h1{ font-size: clamp(20px,5vw,26px); margin:6px 0 10px; }
+  .start-card p{ color:#C7CCE6; font-size:13.5px; line-height:1.6; margin:0 0 20px; }
+  .start-card ul{ text-align:left; color:#C7CCE6; font-size:13px; line-height:1.9; margin:0 0 22px; padding-left:20px; }
+  .play-btn{
+    background: linear-gradient(135deg, var(--orange), #ff8a5c); color:#fff; border:none;
+    padding:16px 40px; border-radius:30px; font-size:16px; font-weight:800; cursor:pointer;
+    box-shadow: 0 12px 26px rgba(255,107,53,0.4); font-family:inherit;
+    animation: playPulse 1.8s ease-in-out infinite;
+  }
+  .play-btn:active{ transform:scale(.96); }
+  @keyframes playPulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.035);} }
+  .sound-note{ margin-top:14px; font-size:11.5px; color:#8890B5; }
+
+  /* ---- Sound toggle ---- */
+  #soundToggle{
+    position:fixed; top:16px; right:16px; z-index:60;
+    width:42px; height:42px; border-radius:50%; border:1px solid #3a4278;
+    background:var(--navy2); color:#fff; font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  }
+  #soundToggle:active{ transform:scale(.92); }
+
+  /* ---- Streak badge ---- */
+  .streak-badge{
+    position:absolute; top:-6px; left:50%; transform:translateX(-50%) scale(0);
+    background: linear-gradient(135deg, #ffb347, var(--orange));
+    color:#fff; font-weight:800; font-size:13px; padding:7px 16px; border-radius:20px;
+    z-index:5; white-space:nowrap; box-shadow: 0 8px 18px rgba(255,107,53,0.45);
+    opacity:0;
+  }
+  .streak-badge.show{
+    animation: streakPop 1.4s cubic-bezier(.3,1.4,.4,1) forwards;
+  }
+  @keyframes streakPop{
+    0%{ transform:translateX(-50%) scale(0); opacity:0; }
+    15%{ transform:translateX(-50%) scale(1.15); opacity:1; }
+    25%{ transform:translateX(-50%) scale(1); opacity:1; }
+    80%{ transform:translateX(-50%) scale(1); opacity:1; }
+    100%{ transform:translateX(-50%) scale(.9); opacity:0; }
+  }
+
+  /* ---- Confetti ---- */
+  .confetti-piece{
+    position:fixed; top:-20px; z-index:200; pointer-events:none; border-radius:2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    to{ transform: translateY(110vh) rotate(720deg); opacity:0.15; }
+  }
+
+  .card.tint-rentan{ box-shadow: 0 18px 40px rgba(255,92,92,0.45), 0 0 0 3px rgba(255,92,92,0.6) inset; }
+  .card.tint-aman{ box-shadow: 0 18px 40px rgba(32,199,118,0.45), 0 0 0 3px rgba(32,199,118,0.6) inset; }
+</style>
+</head>
+<body>
+<div class="decor d1"></div>
+<div class="decor d2"></div>
+
+<button id="soundToggle" title="Aktifkan/matikan suara">🔊</button>
+
+<div id="startOverlay">
+  <div class="start-card">
+    <div class="emoji-row">🔴🤖🟢</div>
+    <h1>Sortir Karier: Rentan atau Aman dari AI?</h1>
+    <p>Uji seberapa jeli kamu membaca tanda-tanda masa depan pekerjaan!</p>
+    <ul>
+      <li>🎧 35 kartu pekerjaan akan muncul satu per satu.</li>
+      <li>👉 Geser atau klik ke kelompok yang tepat.</li>
+      <li>🔥 Kumpulkan streak jawaban benar berturut-turut.</li>
+      <li>🏆 Lihat skor akhir & pembahasannya di akhir permainan.</li>
+    </ul>
+    <button class="play-btn" id="startBtn">🎮 Mulai Bermain</button>
+    <div class="sound-note">Musik & efek suara akan aktif otomatis — bisa dimatikan lewat tombol 🔊 di pojok kanan atas.</div>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="eyebrow">KKA • Kelas VIII</div>
+    <h1>Sortir Karier: Rentan atau Aman dari AI?</h1>
+    <p class="sub">Geser atau klik setiap pekerjaan ke kelompok yang tepat: rentan digantikan AI, atau sulit digantikan AI.</p>
+  </header>
+
+  <div class="hud" id="hud">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="score-pill">Skor <span id="scoreVal">0</span>/<span id="totalVal">20</span></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="zone-hint left" id="hintLeft"><span class="icon">🔴</span>RENTAN<br>DIGANTIKAN AI</div>
+    <div class="zone-hint right" id="hintRight"><span class="icon">🟢</span>SULIT<br>DIGANTIKAN AI</div>
+    <div class="streak-badge" id="streakBadge"></div>
+    <!-- cards injected here -->
+  </div>
+
+  <p class="explain" id="explainText"></p>
+  <button class="next-btn" id="nextBtn" style="display:none;">Lanjut ▶</button>
+
+  <div class="controls" id="controls">
+    <button class="btn rentan" id="btnRentan"><span class="big">🔴</span>Rentan Digantikan</button>
+    <button class="btn aman" id="btnAman"><span class="big">🟢</span>Sulit Digantikan</button>
+  </div>
+  <div class="hint-row">Bisa juga geser kartu ke kiri (rentan) atau ke kanan (aman) — atau pakai tombol panah keyboard.</div>
+
+  <div class="results" id="results">
+    <div class="eyebrow" style="margin-top:6px;">Hasil Akhir</div>
+    <div class="score-big"><span id="finalScore">0</span>/<span id="finalTotal">20</span></div>
+    <div class="score-label">jawaban benar</div>
+    <div class="tier-msg" id="tierMsg"></div>
+    <div class="review" id="reviewList"></div>
+    <button class="replay-btn" id="replayBtn">Main Lagi</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const JOBS = [
+    // Rentan digantikan AI
+    { title:"Kasir & Pramuniaga", emoji:"\ud83d\uded2", group:"rentan", why:"Digantikan mesin self-checkout dan aplikasi belanja online." },
+    { title:"Teller Bank", emoji:"\ud83c\udfe6", group:"rentan", why:"ATM pintar dan mobile banking mengambil alih sebagian besar transaksi." },
+    { title:"Layanan Pelanggan (CS)", emoji:"\ud83c\udfa7", group:"rentan", why:"Chatbot AI bisa menjawab pertanyaan pelanggan 24 jam nonstop." },
+    { title:"Sopir Taksi/Ojek Online", emoji:"\ud83d\ude95", group:"rentan", why:"Mobil otonom (self-driving) mulai diuji coba mengantar penumpang." },
+    { title:"Buruh Pabrik/Perakitan", emoji:"\ud83c\udfed", group:"rentan", why:"Lengan robot bekerja lebih cepat, presisi, dan tanpa lelah." },
+    { title:"Penerjemah Teks Sederhana", emoji:"\ud83c\udf10", group:"rentan", why:"AI seperti Google Translate sudah cukup akurat untuk teks sehari-hari." },
+    { title:"Admin Entri Data", emoji:"\ud83d\uddc2\ufe0f", group:"rentan", why:"AI bisa memasukkan dan menyortir data lebih cepat dan akurat." },
+    { title:"Petugas Tol/Parkir", emoji:"\ud83d\udea7", group:"rentan", why:"Sistem tap otomatis & kamera pengenal plat menggantikan tugas ini." },
+    { title:"Telemarketing", emoji:"\ud83d\udcde", group:"rentan", why:"Panggilan penawaran otomatis kini banyak dijalankan suara AI." },
+    { title:"Resepsionis", emoji:"\ud83d\udece\ufe0f", group:"rentan", why:"Layar sentuh dan asisten virtual mulai menggantikan tugas ini." },
+    { title:"Petugas Gudang/Pengepakan", emoji:"\ud83d\udce6", group:"rentan", why:"Robot gudang di pusat logistik besar sudah mulai memindah & mengepak barang otomatis." },
+    { title:"Analis Data Dasar", emoji:"\ud83d\udcca", group:"rentan", why:"AI bisa mengolah dan merangkum data dalam hitungan detik." },
+    { title:"Operator Mesin Pabrik", emoji:"\u2699\ufe0f", group:"rentan", why:"Mesin otomatis kini bisa dikendalikan dan dipantau sistem AI tanpa operator manual." },
+    { title:"Petugas Pemantau CCTV", emoji:"\ud83d\udcf9", group:"rentan", why:"Kamera AI kini bisa mendeteksi hal mencurigakan otomatis tanpa terus dipantau manusia." },
+    { title:"Penulis Artikel/Caption Sederhana", emoji:"\u270d\ufe0f", group:"rentan", why:"AI seperti ChatGPT bisa menulis draf artikel & caption dengan cepat." },
+    { title:"Petugas Survei/Pendataan", emoji:"\ud83d\udccb", group:"rentan", why:"Formulir dan sensor digital kini bisa mengumpulkan data secara otomatis." },
+    { title:"Kurir Paket Jarak Dekat", emoji:"\ud83d\udef5\ufe0f", group:"rentan", why:"Robot dan drone pengantar mulai diuji coba untuk pengiriman jarak dekat." },
+    { title:"Pemeriksa Ejaan/Naskah", emoji:"\ud83d\udcdd", group:"rentan", why:"Aplikasi pemeriksa ejaan & tata bahasa otomatis kini makin akurat." },
+    // Sulit digantikan AI
+    { title:"Dokter", emoji:"\ud83e\ude7a", group:"aman", why:"Butuh diagnosis kompleks, empati, dan tanggung jawab etis ke pasien." },
+    { title:"Guru", emoji:"\ud83e\uddd1\u200d\ud83c\udfeb", group:"aman", why:"Butuh interaksi manusia dan menyesuaikan cara mengajar tiap siswa." },
+    { title:"Psikolog/Konselor", emoji:"\ud83e\udde0", group:"aman", why:"Mendengarkan dan memahami emosi manusia butuh empati mendalam." },
+    { title:"Pemimpin/Manajer", emoji:"\ud83e\uddd1\u200d\ud83d\udcbc", group:"aman", why:"Mengambil keputusan kompleks dan memimpin tim butuh penilaian manusia." },
+    { title:"Perawat", emoji:"\ud83e\uddd1\u200d\u2695\ufe0f", group:"aman", why:"Merawat pasien butuh sentuhan dan kehadiran manusia secara langsung." },
+    { title:"Petugas Pemadam Kebakaran", emoji:"\ud83d\ude92", group:"aman", why:"Mengambil keputusan cepat di situasi darurat nyata dan berbahaya." },
+    { title:"Tukang Ledeng/Elektrisi", emoji:"\ud83d\udd27", group:"aman", why:"Kerja fisik di lokasi tak terduga butuh keterampilan tangan & adaptasi." },
+    { title:"Koki Profesional", emoji:"\ud83d\udc68\u200d\ud83c\udf73", group:"aman", why:"Meracik rasa dan kreativitas kuliner butuh sentuhan personal." },
+    { title:"Seniman/Musisi", emoji:"\ud83c\udfa8", group:"aman", why:"Karya orisinal lahir dari pengalaman dan emosi manusia yang unik." },
+    { title:"Pekerja Sosial", emoji:"\ud83e\udd1d", group:"aman", why:"Membangun kepercayaan dan hubungan manusia butuh empati asli." },
+    { title:"Atlet Olahraga", emoji:"\ud83c\udfc3", group:"aman", why:"Performa fisik dan mental manusia di kompetisi nyata tak bisa digantikan mesin." },
+    { title:"Petani/Peternak", emoji:"\ud83c\udf3e", group:"aman", why:"Butuh insting dan pengalaman membaca kondisi alam yang selalu berubah." },
+    { title:"Pengacara/Hakim", emoji:"\u2696\ufe0f", group:"aman", why:"Butuh penalaran etis, empati, dan keputusan hukum yang kompleks." },
+    { title:"Arsitek", emoji:"\ud83d\udcd0", group:"aman", why:"Merancang bangunan butuh kreativitas dan mempertimbangkan kebutuhan manusia." },
+    { title:"Pramugari/Pramugara", emoji:"\u2708\ufe0f", group:"aman", why:"Menjamin keselamatan & kenyamanan penumpang butuh respons manusia di situasi tak terduga." },
+    { title:"Wasit/Juri Pertandingan", emoji:"\ud83c\udfc5", group:"aman", why:"Mengambil keputusan cepat dan adil di lapangan berdasarkan situasi nyata." },
+    { title:"Pemuka Agama/Rohaniwan", emoji:"\ud83d\udd4c", group:"aman", why:"Membimbing spiritual dan emosional jamaah butuh kedekatan manusiawi." },
+  ];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  /* ================= AUDIO ENGINE (fully synthesized, no files needed) ================= */
+  let actx = null, masterMusic = null, masterSfx = null, soundOn = true, musicNodes = null;
+
+  function initAudio(){
+    if(actx) return;
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    masterMusic = actx.createGain(); masterMusic.gain.value = 0.09; masterMusic.connect(actx.destination);
+    masterSfx = actx.createGain(); masterSfx.gain.value = 0.45; masterSfx.connect(actx.destination);
+    unlockAudio();
+    startBackgroundMusic();
+  }
+
+  // Unlock trick for browsers (esp. iOS Safari) that need an explicit silent
+  // buffer played inside the user-gesture call stack before audio flows.
+  function unlockAudio(){
+    try{
+      const buffer = actx.createBuffer(1, 1, 22050);
+      const src = actx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(actx.destination);
+      src.start(0);
+    }catch(e){ /* no-op */ }
+    if(actx.state === 'suspended'){ actx.resume(); }
+  }
+
+  function ensureRunning(){
+    if(actx && actx.state === 'suspended'){ actx.resume(); }
+  }
+
+  function startBackgroundMusic(){
+    // Two soft oscillators gliding through a slow ambient chord progression
+    const oscRoot = actx.createOscillator(); oscRoot.type = 'sine';
+    const oscFifth = actx.createOscillator(); oscFifth.type = 'triangle';
+    const filter = actx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 900;
+    const gainFifth = actx.createGain(); gainFifth.gain.value = 0.55;
+
+    oscRoot.connect(filter);
+    oscFifth.connect(gainFifth); gainFifth.connect(filter);
+    filter.connect(masterMusic);
+
+    const progression = [110.00, 87.31, 130.81, 98.00]; // A2, F2, C3, G2
+    const chordDur = 5.2;
+    let t = actx.currentTime + 0.1;
+    oscRoot.frequency.setValueAtTime(progression[0], t);
+    oscFifth.frequency.setValueAtTime(progression[0]*1.5, t);
+    oscRoot.start(t); oscFifth.start(t);
+
+    // gentle filter breathing
+    let lfoPhase = 0;
+    function breathe(){
+      if(!actx) return;
+      lfoPhase += 0.02;
+      filter.frequency.setTargetAtTime(700 + Math.sin(lfoPhase)*250, actx.currentTime, 0.5);
+      musicNodes.breatheTimer = setTimeout(breathe, 300);
+    }
+
+    let step = 0;
+    function nextChord(){
+      if(!actx) return;
+      step = (step+1) % progression.length;
+      const now = actx.currentTime;
+      oscRoot.frequency.linearRampToValueAtTime(progression[step], now + 1.6);
+      oscFifth.frequency.linearRampToValueAtTime(progression[step]*1.5, now + 1.6);
+      musicNodes.chordTimer = setTimeout(nextChord, chordDur*1000);
+    }
+    musicNodes = { oscRoot, oscFifth, filter, chordTimer: null, breatheTimer: null };
+    musicNodes.chordTimer = setTimeout(nextChord, chordDur*1000);
+    breathe();
+  }
+
+  function toggleSound(){
+    soundOn = !soundOn;
+    soundToggle.textContent = soundOn ? '🔊' : '🔇';
+    if(masterMusic) masterMusic.gain.setTargetAtTime(soundOn ? 0.09 : 0, actx.currentTime, 0.15);
+  }
+
+  function tone(freq, dur, type, vol, delay, glideTo){
+    if(!actx || !soundOn) return;
+    ensureRunning();
+    const now = actx.currentTime + (delay||0);
+    const osc = actx.createOscillator(); osc.type = type || 'sine';
+    const g = actx.createGain(); g.gain.value = 0;
+    osc.frequency.setValueAtTime(freq, now);
+    if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, now + dur*0.9);
+    osc.connect(g); g.connect(masterSfx);
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(vol||0.5, now + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc.start(now); osc.stop(now + dur + 0.05);
+  }
+
+  function sfxCorrect(){ tone(523.25,0.12,'sine',0.5,0); tone(659.25,0.12,'sine',0.45,0.08); tone(783.99,0.22,'sine',0.4,0.16); }
+  function sfxWrong(){ tone(200,0.18,'square',0.35,0); tone(150,0.28,'square',0.3,0.09); }
+  function sfxSwipe(){ tone(500,0.12,'sine',0.12,0,180); }
+  function sfxClick(){ tone(700,0.06,'sine',0.2,0); }
+  function sfxStreak(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,0.16,'triangle',0.35,i*0.07)); }
+  function sfxFanfare(){ [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,0.35,'triangle',0.4,i*0.12)); }
+
+  function vibrate(pattern){
+    if('vibrate' in navigator){ try{ navigator.vibrate(pattern); }catch(e){} }
+  }
+
+  /* ================= CONFETTI ================= */
+  const CONFETTI_COLORS = ['#00C2CB','#FF6B35','#20C776','#FFD166','#ffffff'];
+  function spawnConfetti(x, y, count){
+    for(let i=0;i<(count||16);i++){
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      const size = 6 + Math.random()*6;
+      p.style.width = size+'px';
+      p.style.height = (size*0.4)+'px';
+      p.style.left = (x + (Math.random()-0.5)*140) + 'px';
+      p.style.top = y + 'px';
+      p.style.background = CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+      const dur = 1.2 + Math.random()*0.9;
+      p.style.animationDuration = dur + 's';
+      p.style.transform = `rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(), dur*1000 + 100);
+    }
+  }
+
+  let deck = shuffle(JOBS);
+  let idx = 0;
+  let score = 0;
+  let answers = []; // {title, correct, chosen}
+  let dragging = false, dragStartX = 0, dragCurX = 0, cardEl = null;
+  let locked = false;
+
+  const stage = document.getElementById('stage');
+  const explainText = document.getElementById('explainText');
+  const scoreVal = document.getElementById('scoreVal');
+  const totalVal = document.getElementById('totalVal');
+  const progressFill = document.getElementById('progressFill');
+  const hintLeft = document.getElementById('hintLeft');
+  const hintRight = document.getElementById('hintRight');
+  const btnRentan = document.getElementById('btnRentan');
+  const btnAman = document.getElementById('btnAman');
+  const results = document.getElementById('results');
+  const controls = document.getElementById('controls');
+  const hud = document.getElementById('hud');
+  const explainEl = document.getElementById('explainText');
+  const replayBtn = document.getElementById('replayBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const soundToggle = document.getElementById('soundToggle');
+  const startOverlay = document.getElementById('startOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const streakBadge = document.getElementById('streakBadge');
+  let advanceTimer = null;
+  let streak = 0;
+
+  totalVal.textContent = deck.length;
+
+  function renderStack(){
+    stage.querySelectorAll('.card').forEach(c=>c.remove());
+    const upcoming = deck.slice(idx, idx+3);
+    // render back to front: 2nd-behind, 1st-behind, front
+    for(let k = Math.min(2, upcoming.length-1); k>=0; k--){
+      const job = upcoming[k];
+      const el = document.createElement('div');
+      el.className = 'card ' + (k===0 ? 'front' : (k===1 ? 'behind1' : 'behind2'));
+      el.innerHTML = `
+        <div class="job-num">#${idx+k+1} / ${deck.length}</div>
+        <div class="emoji">${job.emoji}</div>
+        <div class="job-title">${job.title}</div>
+        <div class="flash" id="flash"></div>
+      `;
+      stage.appendChild(el);
+      if(k===0){
+        cardEl = el;
+        attachDrag(el);
+      }
+    }
+    explainText.textContent = '';
+    explainText.className = 'explain';
+    locked = false;
+    btnRentan.disabled = false;
+    btnAman.disabled = false;
+  }
+
+  function updateHud(){
+    scoreVal.textContent = score;
+    progressFill.style.width = (idx/deck.length*100) + '%';
+  }
+
+  function attachDrag(el){
+    el.addEventListener('pointerdown', onDown);
+  }
+  function onDown(e){
+    if(locked) return;
+    dragging = true;
+    dragStartX = e.clientX;
+    dragCurX = 0;
+    cardEl.setPointerCapture(e.pointerId);
+    cardEl.style.transition = 'none';
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }
+  function onMove(e){
+    if(!dragging) return;
+    dragCurX = e.clientX - dragStartX;
+    const rot = dragCurX / 18;
+    cardEl.style.transform = `translateX(${dragCurX}px) rotate(${rot}deg)`;
+    if(dragCurX < -30){
+      hintLeft.style.opacity = Math.min(1, Math.abs(dragCurX)/120);
+      hintRight.style.opacity = 0;
+      cardEl.classList.add('tint-rentan'); cardEl.classList.remove('tint-aman');
+    } else if(dragCurX > 30){
+      hintRight.style.opacity = Math.min(1, dragCurX/120);
+      hintLeft.style.opacity = 0;
+      cardEl.classList.add('tint-aman'); cardEl.classList.remove('tint-rentan');
+    } else {
+      hintLeft.style.opacity = 0; hintRight.style.opacity = 0;
+      cardEl.classList.remove('tint-rentan','tint-aman');
+    }
+  }
+  function onUp(e){
+    if(!dragging) return;
+    dragging = false;
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    cardEl.style.transition = '';
+    hintLeft.style.opacity = 0; hintRight.style.opacity = 0;
+    const threshold = 90;
+    if(dragCurX <= -threshold){
+      sfxSwipe();
+      choose('rentan');
+    } else if(dragCurX >= threshold){
+      sfxSwipe();
+      choose('aman');
+    } else {
+      cardEl.style.transform = '';
+      cardEl.classList.remove('tint-rentan','tint-aman');
+    }
+  }
+
+  function choose(pick){
+    if(locked || idx >= deck.length) return;
+    locked = true;
+    btnRentan.disabled = true;
+    btnAman.disabled = true;
+    const job = deck[idx];
+    const correct = job.group === pick;
+    if(correct) score++;
+    answers.push({ title: job.title, emoji: job.emoji, correct, group: job.group });
+
+    const flyX = pick === 'rentan' ? -520 : 520;
+    const rot = pick === 'rentan' ? -22 : 22;
+    if(cardEl){
+      cardEl.style.transform = `translateX(${flyX}px) rotate(${rot}deg)`;
+      cardEl.style.opacity = '0';
+    }
+
+    explainEl.className = 'explain ' + (correct ? 'good' : 'bad');
+    explainEl.innerHTML = (correct ? '<b>Benar!</b> ' : '<b>Kurang tepat.</b> ') + job.why;
+
+    if(correct){
+      streak++;
+      sfxCorrect();
+      vibrate(40);
+      const rect = stage.getBoundingClientRect();
+      spawnConfetti(rect.left + rect.width/2, rect.top + rect.height/2, 14);
+      if(streak >= 3){
+        streakBadge.textContent = '🔥 Streak x' + streak + '!';
+        streakBadge.classList.remove('show'); void streakBadge.offsetWidth;
+        streakBadge.classList.add('show');
+        if(streak === 3 || streak % 5 === 0) sfxStreak();
+      }
+    } else {
+      streak = 0;
+      sfxWrong();
+      vibrate([30,40,30]);
+      streakBadge.classList.remove('show');
+    }
+
+    updateHud();
+
+    nextBtn.style.display = 'inline-block';
+    function goNext(){
+      if(advanceTimer) clearTimeout(advanceTimer);
+      nextBtn.style.display = 'none';
+      nextBtn.removeEventListener('click', onNextClick);
+      idx++;
+      updateHud();
+      if(idx >= deck.length){
+        showResults();
+      } else {
+        renderStack();
+      }
+    }
+    function onNextClick(){ sfxClick(); goNext(); }
+    nextBtn.addEventListener('click', onNextClick);
+    advanceTimer = setTimeout(goNext, 45000);
+  }
+
+  btnRentan.addEventListener('click', ()=>{ sfxClick(); choose('rentan'); });
+  btnAman.addEventListener('click', ()=>{ sfxClick(); choose('aman'); });
+  window.addEventListener('keydown', (e)=>{
+    if(results.style.display === 'flex') return;
+    if(e.key === 'ArrowLeft') choose('rentan');
+    if(e.key === 'ArrowRight') choose('aman');
+  });
+
+  function showResults(){
+    stage.style.display = 'none';
+    controls.style.display = 'none';
+    hud.style.display = 'none';
+    explainEl.style.display = 'none';
+    document.querySelector('.hint-row').style.display = 'none';
+    results.style.display = 'flex';
+
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalTotal').textContent = deck.length;
+    const pct = score / deck.length;
+    let tier;
+    if(pct >= 0.9) tier = "Jago banget! Kamu paham betul mana pekerjaan yang rentan dan yang butuh sentuhan manusia. \ud83c\udf1f";
+    else if(pct >= 0.7) tier = "Bagus! Sebagian besar jawabanmu tepat \u2014 yuk diskusikan bareng teman yang masih ragu.";
+    else if(pct >= 0.4) tier = "Lumayan! Masih ada beberapa yang perlu dipelajari ulang bersama guru.";
+    else tier = "Yuk pelajari lagi materinya \u2014 coba cek review di bawah ini satu per satu.";
+    document.getElementById('tierMsg').textContent = tier;
+    if(pct >= 0.7){ sfxFanfare(); spawnConfetti(window.innerWidth/2, 120, 40); }
+
+    const reviewList = document.getElementById('reviewList');
+    reviewList.innerHTML = '<div class="review-title">Review Jawaban</div>' + answers.map(a=>`
+      <div class="review-item ${a.correct ? 'correct' : 'wrong'}">
+        <span class="rmark">${a.correct ? '\u2713' : '\u2717'}</span>
+        <span class="rlabel">${a.emoji} ${a.title}</span>
+        <span class="rtag">${a.group === 'rentan' ? 'Rentan' : 'Aman'}</span>
+      </div>
+    `).join('');
+  }
+
+  replayBtn.addEventListener('click', ()=>{
+    sfxClick();
+    if(advanceTimer) clearTimeout(advanceTimer);
+    nextBtn.style.display = 'none';
+    deck = shuffle(JOBS);
+    idx = 0; score = 0; answers = []; streak = 0;
+    streakBadge.classList.remove('show');
+    results.style.display = 'none';
+    stage.style.display = 'flex';
+    controls.style.display = 'flex';
+    hud.style.display = 'flex';
+    explainEl.style.display = 'block';
+    document.querySelector('.hint-row').style.display = 'block';
+    updateHud();
+    renderStack();
+  });
+
+  soundToggle.addEventListener('click', toggleSound);
+
+  startBtn.addEventListener('click', ()=>{
+    initAudio();
+    if(actx && actx.state === 'suspended') actx.resume();
+    setTimeout(()=>{ sfxStreak(); }, 150); // audible confirmation chime
+    startOverlay.classList.add('hide');
+  });
+
+  renderStack();
+  updateHud();
+})();
+</script>
+</body>
+</html>
