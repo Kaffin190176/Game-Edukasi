@@ -1,0 +1,4134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🎮 Misi Jaringan - Tree & Graph</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f1f5f9;
+    color:#1e293b;
+}
+
+/* ================= HEADER ================= */
+
+header{
+    background:linear-gradient(135deg,#1e293b,#334155);
+    color:white;
+    padding:16px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.logo h1{
+    font-size:24px;
+}
+
+.logo p{
+    font-size:13px;
+    opacity:.8;
+    margin-top:4px;
+}
+
+.stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.stat{
+    background:rgba(255,255,255,.12);
+    padding:8px 14px;
+    border-radius:9px;
+    text-align:center;
+    min-width:80px;
+}
+
+.stat small{
+    display:block;
+    font-size:10px;
+    opacity:.7;
+}
+
+.stat strong{
+    font-size:17px;
+}
+
+.music-btn{
+    border:0;
+    padding:9px 14px;
+    border-radius:9px;
+    cursor:pointer;
+    background:rgba(255,255,255,.12);
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.music-btn:hover{
+    background:rgba(255,255,255,.22);
+}
+
+.music-btn.playing{
+    background:#16a34a;
+}
+
+/* ================= START ================= */
+
+.start-screen{
+    min-height:calc(100vh - 80px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+}
+
+.start-card{
+    width:100%;
+    max-width:650px;
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,.1);
+    text-align:center;
+}
+
+.start-icon{
+    font-size:65px;
+}
+
+.start-card h2{
+    margin:10px 0;
+    font-size:30px;
+}
+
+.start-card p{
+    color:#64748b;
+    line-height:1.6;
+}
+
+.name-input{
+    width:100%;
+    margin-top:20px;
+    padding:14px;
+    border:2px solid #cbd5e1;
+    border-radius:10px;
+    font-size:16px;
+}
+
+.start-btn{
+    width:100%;
+    margin-top:10px;
+    padding:14px;
+    border:0;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* ================= GAME ================= */
+
+.game-container{
+    display:none;
+    padding:15px;
+}
+
+.game-grid{
+    display:grid;
+    grid-template-columns:260px 1fr 260px;
+    gap:15px;
+}
+
+.panel{
+    background:white;
+    border-radius:15px;
+    padding:17px;
+    box-shadow:0 4px 15px rgba(0,0,0,.06);
+}
+
+.panel h3{
+    margin-bottom:12px;
+}
+
+.mission-title{
+    font-size:19px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.mission-description{
+    font-size:13px;
+    line-height:1.5;
+    color:#64748b;
+}
+
+.requirement{
+    margin-top:15px;
+    padding:12px;
+    background:#f8fafc;
+    border-radius:10px;
+    font-size:13px;
+}
+
+.requirement div{
+    margin-bottom:7px;
+}
+
+.case-box{
+    margin-top:15px;
+    background:#eff6ff;
+    padding:12px;
+    border-radius:10px;
+    font-size:13px;
+    line-height:1.5;
+}
+
+/* ================= TOOLBAR ================= */
+
+.game-area{
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,.06);
+}
+
+.toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    padding:11px;
+    background:#f8fafc;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.toolbar button{
+    border:0;
+    padding:9px 11px;
+    border-radius:8px;
+    cursor:pointer;
+    background:#e2e8f0;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.toolbar button:hover{
+    background:#cbd5e1;
+}
+
+.toolbar .active{
+    background:#2563eb;
+    color:white;
+}
+
+.toolbar .danger{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.toolbar .danger.active{
+    background:#b91c1c;
+    color:white;
+}
+
+.toolbar .check{
+    background:#16a34a;
+    color:white;
+}
+
+.message{
+    margin:10px;
+    padding:10px;
+    border-radius:8px;
+    background:#eff6ff;
+    color:#1d4ed8;
+    font-size:13px;
+    transition:background .2s,color .2s;
+}
+
+.message.success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.message.error{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+/* ================= BOARD ================= */
+
+#board{
+    position:relative;
+    height:560px;
+    overflow:hidden;
+
+    background-color:white;
+
+    background-image:
+        linear-gradient(#e2e8f0 1px,transparent 1px),
+        linear-gradient(90deg,#e2e8f0 1px,transparent 1px);
+
+    background-size:30px 30px;
+}
+
+#edgesSvg{
+    position:absolute;
+    width:100%;
+    height:100%;
+    left:0;
+    top:0;
+    z-index:1;
+    pointer-events:none;
+}
+
+.edge-line{
+    stroke:#64748b;
+    stroke-width:3;
+}
+
+.node{
+    position:absolute;
+
+    width:55px;
+    height:55px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#2563eb;
+    color:white;
+
+    font-weight:bold;
+    font-size:18px;
+
+    border:4px solid white;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.18);
+
+    cursor:grab;
+
+    z-index:5;
+
+    user-select:none;
+
+    touch-action:none;
+}
+
+.node.selected{
+    background:#f59e0b;
+    transform:scale(1.1);
+}
+
+.node.root{
+    background:#16a34a;
+}
+
+.node.root::after{
+    content:"ROOT";
+    position:absolute;
+    top:-23px;
+    background:#166534;
+    color:white;
+    font-size:9px;
+    padding:3px 5px;
+    border-radius:4px;
+}
+
+/* ================= HELP ================= */
+
+.help-list{
+    list-style:none;
+}
+
+.help-list li{
+    font-size:12px;
+    line-height:1.4;
+    padding:7px 0;
+    border-bottom:1px solid #e2e8f0;
+}
+
+/* ================= TERMS ================= */
+
+.terms{
+    margin-top:18px;
+}
+
+.term{
+    font-size:11px;
+    margin-bottom:7px;
+}
+
+.term strong{
+    color:#2563eb;
+}
+
+/* ================= LEADERBOARD ================= */
+
+.leaderboard{
+    margin-top:20px;
+}
+
+.leaderboard table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:11px;
+}
+
+.leaderboard th,
+.leaderboard td{
+    padding:6px 3px;
+    border-bottom:1px solid #e2e8f0;
+}
+
+.clear-btn{
+    margin-top:8px;
+    border:0;
+    background:#fee2e2;
+    color:#b91c1c;
+    padding:6px 8px;
+    border-radius:6px;
+    font-size:10px;
+    cursor:pointer;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.7);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:100;
+    overflow-y:auto;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:600px;
+    background:white;
+    padding:28px;
+    border-radius:20px;
+    text-align:center;
+    margin:auto;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.modal-icon{
+    font-size:55px;
+}
+
+.modal-card h2{
+    margin:10px 0;
+}
+
+.modal-card p{
+    color:#64748b;
+    line-height:1.6;
+}
+
+/* ================= QUIZ ================= */
+
+.quiz-card{
+    text-align:left;
+    margin-top:20px;
+}
+
+.quiz-case{
+    background:#f8fafc;
+    border-left:5px solid #2563eb;
+    padding:15px;
+    border-radius:8px;
+    line-height:1.6;
+    margin-bottom:18px;
+}
+
+.quiz-question{
+    font-size:17px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.quiz-option{
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:12px;
+    margin:8px 0;
+    border:2px solid #e2e8f0;
+    border-radius:9px;
+    background:white;
+    cursor:pointer;
+}
+
+.quiz-option:hover{
+    background:#f8fafc;
+}
+
+.quiz-option.correct{
+    background:#dcfce7;
+    border-color:#16a34a;
+}
+
+.quiz-option.wrong{
+    background:#fee2e2;
+    border-color:#dc2626;
+}
+
+.quiz-next{
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    border:0;
+    border-radius:8px;
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.quiz-progress{
+    font-size:12px;
+    color:#64748b;
+    margin-bottom:8px;
+}
+
+.quiz-explanation{
+    margin-top:10px;
+    padding:10px 12px;
+    background:#eff6ff;
+    border-left:4px solid #2563eb;
+    border-radius:6px;
+    font-size:13px;
+    line-height:1.5;
+    color:#1d4ed8;
+}
+
+/* ================= RECAP ================= */
+
+.recap-summary{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin:15px 0;
+    flex-wrap:wrap;
+}
+
+.recap-summary .badge{
+    padding:8px 16px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.recap-summary .badge.correct{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.recap-summary .badge.wrong{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.recap-list{
+    text-align:left;
+    margin-top:15px;
+    max-height:340px;
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+.recap-item{
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.recap-item.is-correct{
+    border-left:5px solid #16a34a;
+}
+
+.recap-item.is-wrong{
+    border-left:5px solid #dc2626;
+}
+
+.recap-item .recap-head{
+    font-size:11px;
+    color:#64748b;
+    margin-bottom:4px;
+}
+
+.recap-item .recap-question{
+    font-weight:bold;
+    font-size:13px;
+    margin-bottom:6px;
+}
+
+.recap-item .recap-answer{
+    font-size:12.5px;
+    margin-bottom:3px;
+}
+
+.recap-item .recap-answer.your-wrong{
+    color:#b91c1c;
+}
+
+.recap-item .recap-answer.your-correct{
+    color:#166534;
+}
+
+.recap-item .recap-explain{
+    margin-top:6px;
+    font-size:12px;
+    color:#1d4ed8;
+    background:#eff6ff;
+    padding:8px 10px;
+    border-radius:6px;
+    line-height:1.5;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+
+    .game-grid{
+        grid-template-columns:230px 1fr;
+    }
+
+    .right-panel{
+        grid-column:1/-1;
+    }
+}
+
+@media(max-width:750px){
+
+    .game-grid{
+        grid-template-columns:1fr;
+    }
+
+    #board{
+        height:500px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" src="backsound.mp3" loop preload="auto"></audio>
+
+<header>
+
+    <div class="logo">
+
+        <h1>
+            🎮 Misi Jaringan
+        </h1>
+
+        <p>
+            Belajar Struktur Data Tree & Graph
+        </p>
+
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <small>SKOR</small>
+            <strong id="score">0</strong>
+        </div>
+
+        <div class="stat">
+            <small>LEVEL</small>
+            <strong id="level">1/5</strong>
+        </div>
+
+        <div class="stat">
+            <small>WAKTU</small>
+            <strong id="timer">05:00</strong>
+        </div>
+
+        <div class="stat">
+            <small>EDGE</small>
+            <strong id="edgeCount">0</strong>
+        </div>
+
+        <button
+            class="music-btn"
+            id="musicToggle"
+            onclick="toggleMusic()"
+        >
+            🔇 Musik: Off
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- ================= START ================= -->
+
+<section
+    class="start-screen"
+    id="startScreen"
+>
+
+    <div class="start-card">
+
+        <div class="start-icon">
+            🌳
+        </div>
+
+        <h2>
+            Misi Jaringan
+        </h2>
+
+        <p>
+            Node sudah disiapkan di setiap level.
+            Tugasmu: baca kasusnya, hubungkan node yang tepat,
+            tentukan Root kalau diminta, lalu jawab quiz-nya!
+        </p>
+
+        <input
+            id="playerName"
+            class="name-input"
+            maxlength="30"
+            placeholder="Masukkan nama siswa..."
+        >
+
+        <button
+            class="start-btn"
+            onclick="startGame()"
+        >
+            🚀 Mulai Permainan
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================= GAME ================= -->
+
+<main
+    class="game-container"
+    id="gameContainer"
+>
+
+<div class="game-grid">
+
+
+<!-- ================= LEFT ================= -->
+
+<aside class="panel">
+
+    <h3>
+        🎯 Misi
+    </h3>
+
+    <div
+        class="mission-title"
+        id="missionTitle"
+    >
+        Level 1
+    </div>
+
+    <div
+        class="mission-description"
+        id="missionDescription"
+    >
+    </div>
+
+    <div class="requirement">
+
+        <div>
+            🔵 Node Tersedia:
+            <strong id="nodeRequirement">4</strong>
+        </div>
+
+        <div>
+            🔗 Edge Dibutuhkan (min):
+            <strong id="edgeRequirement">3</strong>
+        </div>
+
+        <div>
+            🌱 Perlu Root:
+            <strong id="rootRequirement">Ya</strong>
+        </div>
+
+    </div>
+
+    <div class="case-box">
+
+        <strong>
+            📌 Kasus
+        </strong>
+
+        <p id="caseDescription"></p>
+
+    </div>
+
+</aside>
+
+
+<!-- ================= CENTER ================= -->
+
+<section class="game-area">
+
+    <div class="toolbar">
+
+        <button
+            id="connectButton"
+            onclick="startConnect()"
+        >
+            🔗 Hubungkan
+        </button>
+
+        <button
+            id="rootButton"
+            onclick="setRoot()"
+        >
+            🌱 Set Root
+        </button>
+
+        <button
+            id="deleteEdgeButton"
+            class="danger"
+            onclick="startDeleteEdge()"
+        >
+            🗑️ Hapus Edge
+        </button>
+
+        <button onclick="cancelAction()">
+            ❌ Batal
+        </button>
+
+        <button
+            class="check"
+            onclick="checkMission()"
+        >
+            ✅ Cek Struktur
+        </button>
+
+    </div>
+
+    <div
+        class="message"
+        id="gameMessage"
+    >
+        Node sudah tersedia. Hubungkan sesuai kasus untuk memulai.
+    </div>
+
+    <div id="board">
+
+        <svg id="edgesSvg">
+
+            <g id="edgesGroup"></g>
+
+        </svg>
+
+    </div>
+
+</section>
+
+
+<!-- ================= RIGHT ================= -->
+
+<aside class="panel right-panel">
+
+    <h3>
+        📖 Istilah Penting
+    </h3>
+
+    <div class="terms">
+
+        <div class="term">
+            <strong>Root</strong> → simpul paling atas/akar
+        </div>
+
+        <div class="term">
+            <strong>Node</strong> → setiap bagian/simpul dalam Tree
+        </div>
+
+        <div class="term">
+            <strong>Parent</strong> → simpul yang memiliki anak
+        </div>
+
+        <div class="term">
+            <strong>Child</strong> → simpul turunan dari parent
+        </div>
+
+        <div class="term">
+            <strong>Sibling</strong> → node yang memiliki parent sama
+        </div>
+
+        <div class="term">
+            <strong>Leaf</strong> → node yang tidak memiliki anak
+        </div>
+
+        <div class="term">
+            <strong>Edge</strong> → hubungan antara dua node
+        </div>
+
+        <div class="term">
+            <strong>Level</strong> → tingkatan node
+        </div>
+
+        <div class="term">
+            <strong>Subtree</strong> → bagian dari sebuah tree
+        </div>
+
+        <div class="term">
+            <strong>Vertex/Node</strong> → titik atau objek
+        </div>
+
+        <div class="term">
+            <strong>Degree</strong> → jumlah hubungan sebuah node
+        </div>
+
+        <div class="term">
+            <strong>Path</strong> → jalur dari satu node ke node lainnya
+        </div>
+
+        <div class="term">
+            <strong>Connected</strong> → node-node saling terhubung
+        </div>
+
+        <div class="term">
+            <strong>Directed Graph</strong> → hubungan memiliki arah
+        </div>
+
+        <div class="term">
+            <strong>Undirected Graph</strong> → hubungan tidak memiliki arah
+        </div>
+
+        <div class="term">
+            <strong>Weighted Graph</strong> → hubungan memiliki nilai/bobot
+        </div>
+
+    </div>
+
+
+    <div class="leaderboard">
+
+        <h3>
+            🏆 Leaderboard
+        </h3>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>#</th>
+                    <th>Nama</th>
+                    <th>Skor</th>
+                </tr>
+
+            </thead>
+
+            <tbody
+                id="leaderboardBody"
+            ></tbody>
+
+        </table>
+
+        <button
+            class="clear-btn"
+            onclick="clearLeaderboard()"
+        >
+            Hapus Leaderboard
+        </button>
+
+    </div>
+
+</aside>
+
+</div>
+
+</main>
+
+
+<!-- ================= MODAL ================= -->
+
+<div
+    class="modal"
+    id="resultModal"
+>
+
+<div class="modal-card">
+
+    <div
+        class="modal-icon"
+        id="modalIcon"
+    >
+        🎉
+    </div>
+
+    <h2
+        id="modalTitle"
+    >
+        Misi Berhasil
+    </h2>
+
+    <p
+        id="modalMessage"
+    >
+    </p>
+
+    <button
+        class="quiz-next"
+        id="modalButton"
+        onclick="modalAction()"
+    >
+        Lanjut
+    </button>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   DATA LEVEL
+   (setiap soal quiz punya field "explanation" untuk
+   dipakai pada rekap akhir permainan)
+===================================================== */
+
+const levels = [
+
+{
+    title:"Level 1 — Struktur Organisasi Sekolah",
+
+    description:
+        "Hubungkan node yang tersedia menjadi struktur Tree organisasi sekolah.",
+
+    case:
+        "Node yang tersedia mewakili Kepala Sekolah, Wakil Kepala Sekolah, dan para Guru. Hubungkan node-node itu, lalu tentukan satu node sebagai Root (Kepala Sekolah).",
+
+    nodes:4,
+
+    edges:3,
+
+    root:true,
+
+    mode:"tree",
+
+    quiz:[
+        {
+            question:
+                "Kepala Sekolah ada di posisi paling atas. Kepala Sekolah disebut...",
+
+            options:[
+                "Leaf",
+                "Root",
+                "Sibling",
+                "Degree"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Root adalah node paling atas/akar dari sebuah Tree. Kepala Sekolah berada di puncak struktur, sehingga disebut Root."
+        },
+
+        {
+            question:
+                "Wakil Kepala Sekolah punya beberapa Guru di bawahnya. Wakil Kepala Sekolah disebut...",
+
+            options:[
+                "Child",
+                "Leaf",
+                "Parent",
+                "Edge"
+            ],
+
+            answer:2,
+
+            explanation:
+                "Parent adalah node yang memiliki anak (child) di bawahnya. Karena Wakil Kepala Sekolah membawahi para Guru, ia berperan sebagai Parent."
+        },
+
+        {
+            question:
+                "Dua Guru punya atasan yang sama, yaitu Wakil Kepala Sekolah. Kedua Guru itu disebut...",
+
+            options:[
+                "Sibling",
+                "Root",
+                "Path",
+                "Vertex"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Sibling adalah node-node yang memiliki Parent yang sama. Karena kedua Guru sama-sama berada di bawah Wakil Kepala Sekolah, mereka disebut Sibling."
+        },
+
+        {
+            question:
+                "Node yang tidak punya anak (turunan) disebut apa?",
+
+            options:[
+                "Parent",
+                "Root",
+                "Leaf",
+                "Edge"
+            ],
+
+            answer:2,
+
+            explanation:
+                "Leaf adalah node paling ujung yang tidak memiliki child sama sekali, seperti Guru yang tidak membawahi siapa pun."
+        },
+
+        {
+            question:
+                "Garis yang menghubungkan dua node disebut apa?",
+
+            options:[
+                "Level",
+                "Edge",
+                "Leaf",
+                "Subtree"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Edge adalah garis/hubungan yang menghubungkan dua node, misalnya hubungan antara Kepala Sekolah dan Wakil Kepala Sekolah."
+        }
+    ]
+},
+
+{
+    title:"Level 2 — Struktur Folder Komputer",
+
+    description:
+        "Hubungkan node yang tersedia menjadi struktur Tree folder komputer.",
+
+    case:
+        "Anggap salah satu node sebagai folder DOKUMEN (Root), lalu node lain sebagai folder TUGAS dan FOTO yang ada di dalamnya. Hubungkan node-node itu sesuai susunan folder.",
+
+    nodes:5,
+
+    edges:4,
+
+    root:true,
+
+    mode:"tree",
+
+    quiz:[
+        {
+            question:
+                "Folder DOKUMEN ada paling atas. Folder ini disebut...",
+
+            options:[
+                "Root",
+                "Leaf",
+                "Sibling",
+                "Degree"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Root adalah simpul paling atas dalam Tree. Folder DOKUMEN yang menjadi induk dari semua folder lain berperan sebagai Root."
+        },
+
+        {
+            question:
+                "Folder TUGAS dan FOTO ada di dalam folder induk yang sama. Keduanya disebut...",
+
+            options:[
+                "Children",
+                "Sibling",
+                "Root",
+                "Path"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Sibling adalah node-node dengan Parent (induk) yang sama. Karena TUGAS dan FOTO sama-sama berada di dalam DOKUMEN, keduanya adalah Sibling."
+        },
+
+        {
+            question:
+                "Folder TUGAS beserta semua isi di dalamnya disebut...",
+
+            options:[
+                "Subtree",
+                "Degree",
+                "Edge",
+                "Vertex"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Subtree adalah sebuah node beserta seluruh keturunannya. Folder TUGAS dan semua file di dalamnya membentuk satu Subtree."
+        },
+
+        {
+            question:
+                "Posisi tingkat sebuah folder dalam Tree disebut apa?",
+
+            options:[
+                "Path",
+                "Level",
+                "Edge",
+                "Degree"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Level menunjukkan kedalaman/tingkatan sebuah node dari Root. Root berada di Level 0, anak-anaknya di Level 1, dan seterusnya."
+        }
+    ]
+},
+
+{
+    title:"Level 3 — Jaringan Pertemanan",
+
+    description:
+        "Hubungkan node yang tersedia menjadi Graph jaringan pertemanan.",
+
+    case:
+        "Setiap node mewakili satu siswa. Hubungkan node-node yang berteman sampai semua siswa saling terhubung.",
+
+    nodes:5,
+
+    edges:5,
+
+    root:false,
+
+    mode:"graph",
+
+    quiz:[
+        {
+            question:
+                "Setiap siswa dalam Graph pertemanan disebut apa?",
+
+            options:[
+                "Edge",
+                "Vertex/Node",
+                "Path",
+                "Weight"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Vertex (atau Node) adalah istilah untuk setiap titik/objek dalam Graph, dalam hal ini setiap siswa."
+        },
+
+        {
+            question:
+                "Andi berteman dengan Budi. Hubungan mereka disebut apa?",
+
+            options:[
+                "Edge",
+                "Root",
+                "Level",
+                "Leaf"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Edge adalah hubungan/garis yang menghubungkan dua node, dalam hal ini hubungan pertemanan Andi dan Budi."
+        },
+
+        {
+            question:
+                "Andi berteman dengan 4 orang. Berapa degree Andi?",
+
+            options:[
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+
+            answer:2,
+
+            explanation:
+                "Degree adalah jumlah edge (hubungan) yang terhubung ke sebuah node. Karena Andi berteman dengan 4 orang, degree-nya adalah 4."
+        },
+
+        {
+            question:
+                "Urutan dari Andi ke Budi lalu ke Citra disebut apa?",
+
+            options:[
+                "Degree",
+                "Path",
+                "Root",
+                "Subtree"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Path adalah rangkaian/urutan node yang dilalui dari satu node ke node lainnya, misalnya Andi → Budi → Citra."
+        },
+
+        {
+            question:
+                "Semua siswa bisa saling terhubung satu sama lain. Graph ini disebut apa?",
+
+            options:[
+                "Directed",
+                "Weighted",
+                "Connected",
+                "Leaf"
+            ],
+
+            answer:2,
+
+            explanation:
+                "Connected Graph adalah Graph di mana semua node dapat saling dijangkau satu sama lain, langsung maupun tidak langsung."
+        }
+    ]
+},
+
+{
+    title:"Level 4 — Jaringan Jalan Kota",
+
+    description:
+        "Hubungkan node yang tersedia menjadi Graph jaringan jalan antar kota.",
+
+    case:
+        "Setiap node mewakili satu kota. Hubungkan node-node itu dengan garis (edge) yang mewakili jalan, sampai semua kota saling terhubung.",
+
+    nodes:6,
+
+    edges:7,
+
+    root:false,
+
+    mode:"graph",
+
+    quiz:[
+        {
+            question:
+                "Jalan dari Kota A ke Kota B hanya bisa dilewati satu arah. Ini disebut Graph apa?",
+
+            options:[
+                "Undirected Graph",
+                "Directed Graph",
+                "Tree",
+                "Leaf"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Directed Graph adalah Graph yang hubungan antar node-nya memiliki arah, seperti jalan satu arah dari Kota A ke Kota B."
+        },
+
+        {
+            question:
+                "Jalan antara Kota A dan B bisa dilewati dua arah. Ini disebut Graph apa?",
+
+            options:[
+                "Directed Graph",
+                "Weighted Graph",
+                "Undirected Graph",
+                "Subtree"
+            ],
+
+            answer:2,
+
+            explanation:
+                "Undirected Graph adalah Graph yang hubungannya tidak memiliki arah tertentu, sehingga bisa dilalui dari kedua sisi."
+        },
+
+        {
+            question:
+                "Jarak Surabaya–Gresik adalah 30 km. Angka 30 km ini disebut apa?",
+
+            options:[
+                "Root",
+                "Weight",
+                "Leaf",
+                "Sibling"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Weight adalah nilai/bobot yang melekat pada sebuah edge, misalnya jarak 30 km antara Surabaya dan Gresik."
+        },
+
+        {
+            question:
+                "Rangkaian kota dari A ke C lewat B disebut apa?",
+
+            options:[
+                "Path",
+                "Degree",
+                "Level",
+                "Root"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Path adalah urutan node (kota) yang dilalui untuk sampai dari satu titik ke titik lain, misalnya A → B → C."
+        },
+
+        {
+            question:
+                "Banyaknya jalan yang terhubung langsung ke satu kota disebut apa?",
+
+            options:[
+                "Path",
+                "Degree",
+                "Weight",
+                "Level"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Degree adalah jumlah edge (jalan) yang terhubung langsung ke sebuah node (kota)."
+        }
+    ]
+},
+
+{
+    title:"🏆 Level 5 — Boss Mission: Transportasi",
+
+    description:
+        "Hubungkan node yang tersedia menjadi Graph jaringan transportasi, lalu jawab quiz campuran.",
+
+    case:
+        "Setiap node mewakili satu terminal atau stasiun. Hubungkan node-node itu dengan garis (edge) yang mewakili jalur transportasi, sampai semua terminal saling terhubung.",
+
+    nodes:7,
+
+    edges:8,
+
+    root:false,
+
+    mode:"graph",
+
+    quiz:[
+        {
+            question:
+                "Terminal atau stasiun dalam Graph transportasi disebut apa?",
+
+            options:[
+                "Vertex/Node",
+                "Edge",
+                "Weight",
+                "Path"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Vertex (Node) adalah istilah untuk setiap titik dalam Graph, dalam hal ini setiap terminal atau stasiun."
+        },
+
+        {
+            question:
+                "Jalur yang menghubungkan dua stasiun disebut apa?",
+
+            options:[
+                "Root",
+                "Edge",
+                "Leaf",
+                "Level"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Edge adalah hubungan/garis yang menghubungkan dua node, dalam hal ini jalur antar dua stasiun."
+        },
+
+        {
+            question:
+                "Jalur yang punya biaya perjalanan disebut Graph apa?",
+
+            options:[
+                "Weighted Graph",
+                "Tree",
+                "Leaf Graph",
+                "Sibling Graph"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Weighted Graph adalah Graph yang setiap edge-nya memiliki nilai/bobot, misalnya biaya perjalanan."
+        },
+
+        {
+            question:
+                "Jalur yang hanya bisa dilewati satu arah saja disebut apa?",
+
+            options:[
+                "Undirected Graph",
+                "Directed Graph",
+                "Tree",
+                "Subtree"
+            ],
+
+            answer:1,
+
+            explanation:
+                "Directed Graph adalah Graph yang hubungannya memiliki arah, sehingga hanya bisa dilalui satu arah."
+        },
+
+        {
+            question:
+                "Jalur yang bisa dilewati dua arah disebut apa?",
+
+            options:[
+                "Directed Graph",
+                "Weighted Graph",
+                "Undirected Graph",
+                "Root Graph"
+            ],
+
+            answer:2,
+
+            explanation:
+                "Undirected Graph adalah Graph yang hubungannya tidak memiliki arah tertentu, sehingga bisa dilalui dari dua sisi."
+        },
+
+        {
+            question:
+                "Semua terminal bisa saling terhubung lewat jaringan. Ini disebut apa?",
+
+            options:[
+                "Connected",
+                "Leaf",
+                "Sibling",
+                "Subtree"
+            ],
+
+            answer:0,
+
+            explanation:
+                "Connected Graph adalah Graph di mana semua node dapat saling dijangkau satu sama lain melalui jaringan yang ada."
+        }
+    ]
+}
+
+];
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let player="";
+
+let currentLevel=0;
+
+let score=0;
+
+let timeLeft=300;
+
+let timerInterval=null;
+
+let nodes=[];
+
+let edges=[];
+
+let selectedNodes=[];
+
+let connecting=false;
+
+let settingRoot=false;
+
+let deletingEdge=false;
+
+let nodeCounter=0;
+
+let dragData=null;
+
+let quizIndex=0;
+
+let quizScore=0;
+
+let modalMode="";
+
+let quizHistory=[];
+
+
+/* =====================================================
+   ELEMENT
+===================================================== */
+
+const board=
+    document.getElementById("board");
+
+const edgesGroup=
+    document.getElementById("edgesGroup");
+
+const gameMessage=
+    document.getElementById("gameMessage");
+
+const bgMusic=
+    document.getElementById("bgMusic");
+
+
+function setMessage(text,type){
+
+    gameMessage.textContent=text;
+
+    gameMessage.classList.remove(
+        "success",
+        "error"
+    );
+
+    if(type==="success"){
+
+        gameMessage.classList.add(
+            "success"
+        );
+
+    }
+    else if(type==="error"){
+
+        gameMessage.classList.add(
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   BACKSOUND
+===================================================== */
+
+function updateMusicButton(){
+
+    const button=
+        document.getElementById(
+            "musicToggle"
+        );
+
+    if(!button)
+        return;
+
+
+    if(
+        !bgMusic.paused &&
+        !bgMusic.ended
+    ){
+
+        button.textContent=
+            "🔊 Musik: On";
+
+        button.classList.add(
+            "playing"
+        );
+
+    }
+    else{
+
+        button.textContent=
+            "🔇 Musik: Off";
+
+        button.classList.remove(
+            "playing"
+        );
+
+    }
+
+}
+
+
+function toggleMusic(){
+
+    /*
+       Gunakan status asli audio
+       (bgMusic.paused) sebagai acuan,
+       bukan variabel terpisah, supaya
+       tombol tidak pernah "nyangkut".
+    */
+
+    if(
+        !bgMusic.paused &&
+        !bgMusic.ended
+    ){
+
+        bgMusic.pause();
+
+        updateMusicButton();
+
+        return;
+    }
+
+
+    bgMusic.volume=0.5;
+
+    const playPromise=
+        bgMusic.play();
+
+
+    if(
+        playPromise!==undefined
+    ){
+
+        playPromise
+            .then(()=>{
+
+                updateMusicButton();
+
+            })
+            .catch(()=>{
+
+                bgMusic.pause();
+
+                updateMusicButton();
+
+                setMessage(
+                    "⚠️ Tidak dapat memutar backsound.mp3. Pastikan file berada di folder yang sama dengan HTML ini.",
+                    "error"
+                );
+
+            });
+
+    }
+    else{
+
+        updateMusicButton();
+
+    }
+
+}
+
+
+/*
+   Pastikan audio benar-benar berhenti
+   saat halaman pertama kali dibuka,
+   dan tombol selalu mengikuti status
+   audio yang sesungguhnya (play/pause/
+   ended), termasuk jika dikontrol dari
+   luar (misalnya tombol media OS).
+*/
+
+bgMusic.addEventListener(
+    "play",
+    updateMusicButton
+);
+
+bgMusic.addEventListener(
+    "pause",
+    updateMusicButton
+);
+
+bgMusic.addEventListener(
+    "ended",
+    updateMusicButton
+);
+
+function tryAutoplayMusic(){
+
+    bgMusic.volume=0.5;
+
+    const playPromise=
+        bgMusic.play();
+
+
+    if(
+        playPromise!==undefined
+    ){
+
+        playPromise
+            .then(()=>{
+
+                updateMusicButton();
+
+            })
+            .catch(()=>{
+
+                /*
+                   Banyak browser memblokir
+                   autoplay dengan suara sebelum
+                   ada interaksi user. Jika gagal,
+                   coba nyalakan lagi begitu user
+                   melakukan klik/tap pertama kali
+                   di halaman.
+                */
+
+                updateMusicButton();
+
+                const resumeOnInteraction=
+                    ()=>{
+
+                        bgMusic
+                            .play()
+                            .then(
+                                updateMusicButton
+                            )
+                            .catch(()=>{});
+
+                        document.removeEventListener(
+                            "click",
+                            resumeOnInteraction
+                        );
+
+                        document.removeEventListener(
+                            "keydown",
+                            resumeOnInteraction
+                        );
+
+                    };
+
+                document.addEventListener(
+                    "click",
+                    resumeOnInteraction,
+                    {once:true}
+                );
+
+                document.addEventListener(
+                    "keydown",
+                    resumeOnInteraction,
+                    {once:true}
+                );
+
+            });
+
+    }
+    else{
+
+        updateMusicButton();
+
+    }
+
+}
+
+
+window.addEventListener(
+    "DOMContentLoaded",
+    ()=>{
+
+        tryAutoplayMusic();
+
+    }
+);
+
+
+/* =====================================================
+   START
+===================================================== */
+
+function startGame(){
+
+    player=
+        document
+        .getElementById("playerName")
+        .value
+        .trim();
+
+    if(!player){
+
+        alert(
+            "Masukkan nama terlebih dahulu."
+        );
+
+        return;
+    }
+
+    document
+        .getElementById("startScreen")
+        .style.display="none";
+
+    document
+        .getElementById("gameContainer")
+        .style.display="block";
+
+    currentLevel=0;
+
+    score=0;
+
+    timeLeft=300;
+
+    quizHistory=[];
+
+    startTimer();
+
+    loadLevel();
+
+}
+
+
+/* =====================================================
+   TIMER
+===================================================== */
+
+function startTimer(){
+
+    clearInterval(
+        timerInterval
+    );
+
+    timerInterval=
+        setInterval(()=>{
+
+            if(timeLeft<=0){
+
+                clearInterval(
+                    timerInterval
+                );
+
+                saveScore();
+
+                showResult(
+                    "⏰",
+                    "Waktu Habis",
+                    `Permainan selesai. Skor kamu ${score}.`,
+                    "finish"
+                );
+
+                return;
+            }
+
+            timeLeft--;
+
+            updateStats();
+
+        },1000);
+
+}
+
+
+function formatTime(sec){
+
+    const min=
+        Math.floor(sec/60)
+        .toString()
+        .padStart(2,"0");
+
+    const s=
+        (sec%60)
+        .toString()
+        .padStart(2,"0");
+
+    return `${min}:${s}`;
+
+}
+
+
+/* =====================================================
+   LOAD LEVEL
+===================================================== */
+
+function loadLevel(){
+
+    const level=
+        levels[currentLevel];
+
+
+    /*
+       RESET TOTAL
+    */
+
+    document
+        .querySelectorAll("#board .node")
+        .forEach(
+            n=>n.remove()
+        );
+
+    nodes=[];
+
+    edges=[];
+
+    selectedNodes=[];
+
+    connecting=false;
+
+    settingRoot=false;
+
+    deletingEdge=false;
+
+    nodeCounter=0;
+
+    dragData=null;
+
+    edgesGroup.innerHTML="";
+
+
+    document
+        .getElementById("connectButton")
+        .classList.remove("active");
+
+    document
+        .getElementById("deleteEdgeButton")
+        .classList.remove("active");
+
+
+    /*
+       UPDATE INFO
+    */
+
+    document
+        .getElementById("missionTitle")
+        .textContent=
+        level.title;
+
+    document
+        .getElementById("missionDescription")
+        .textContent=
+        level.description;
+
+    document
+        .getElementById("caseDescription")
+        .textContent=
+        level.case;
+
+    document
+        .getElementById("nodeRequirement")
+        .textContent=
+        level.nodes;
+
+    document
+        .getElementById("edgeRequirement")
+        .textContent=
+        level.edges;
+
+    document
+        .getElementById("rootRequirement")
+        .textContent=
+        level.root
+        ?"Ya"
+        :"Tidak";
+
+    document
+        .getElementById("rootButton")
+        .style.display=
+        level.mode==="tree"
+        ?"inline-block"
+        :"none";
+
+
+    /*
+       SEDIAKAN NODE OTOMATIS
+       SESUAI KEBUTUHAN LEVEL
+    */
+
+    generateNodesForLevel(
+        level.nodes
+    );
+
+
+    gameMessage.textContent=
+        `🚀 Level ${currentLevel+1} dimulai! Node sudah tersedia, silakan hubungkan sesuai kasus.`;
+
+    updateStats();
+
+}
+
+
+/* =====================================================
+   GENERATE NODE OTOMATIS (LAYOUT LINGKARAN)
+===================================================== */
+
+function generateNodesForLevel(count){
+
+    const positions=
+        layoutNodesCircle(count);
+
+    for(
+        let i=0;
+        i<count;
+        i++
+    ){
+
+        nodeCounter++;
+
+        const label=
+            numberToLabel(
+                nodeCounter
+            );
+
+        createNode(
+            label,
+            positions[i].x,
+            positions[i].y
+        );
+
+    }
+
+}
+
+
+function layoutNodesCircle(count){
+
+    const width=
+        board.clientWidth||800;
+
+    const height=
+        board.clientHeight||560;
+
+    const centerX=
+        width/2;
+
+    const centerY=
+        height/2;
+
+    const radius=
+        Math.max(
+            60,
+            Math.min(
+                centerX,
+                centerY
+            )-70
+        );
+
+    const positions=[];
+
+    for(
+        let i=0;
+        i<count;
+        i++
+    ){
+
+        const angle=
+            (
+                (2*Math.PI*i)/count
+            )
+            -
+            (Math.PI/2);
+
+        let x=
+            centerX
+            +
+            radius*Math.cos(angle)
+            -
+            27.5;
+
+        let y=
+            centerY
+            +
+            radius*Math.sin(angle)
+            -
+            27.5;
+
+        x=
+            Math.max(
+                5,
+                Math.min(
+                    width-60,
+                    x
+                )
+            );
+
+        y=
+            Math.max(
+                5,
+                Math.min(
+                    height-60,
+                    y
+                )
+            );
+
+        positions.push({x,y});
+
+    }
+
+    return positions;
+
+}
+
+
+/* =====================================================
+   CREATE NODE
+===================================================== */
+
+function createNode(label,x,y){
+
+    const node={
+
+        id:
+            Date.now()
+            +
+            Math.random(),
+
+        label:label,
+
+        x:x,
+
+        y:y,
+
+        root:false,
+
+        element:null
+    };
+
+
+    const element=
+        document.createElement(
+            "div"
+        );
+
+
+    element.className="node";
+
+    element.textContent=label;
+
+    element.style.left=
+        node.x+"px";
+
+    element.style.top=
+        node.y+"px";
+
+
+    element.addEventListener(
+        "pointerdown",
+        e=>startDrag(e,node)
+    );
+
+
+    element.addEventListener(
+        "click",
+        e=>{
+
+            e.stopPropagation();
+
+            if(
+                !dragData ||
+                !dragData.moved
+            ){
+
+                nodeClick(node);
+
+            }
+
+        }
+    );
+
+
+    node.element=element;
+
+    nodes.push(node);
+
+    board.appendChild(element);
+
+    return node;
+
+}
+
+
+/* =====================================================
+   LABEL
+===================================================== */
+
+function numberToLabel(num){
+
+    let result="";
+
+    while(num>0){
+
+        num--;
+
+        result=
+            String.fromCharCode(
+                65+(num%26)
+            )
+            +
+            result;
+
+        num=
+            Math.floor(num/26);
+
+    }
+
+    return result;
+
+}
+
+
+/* =====================================================
+   DRAG
+===================================================== */
+
+function startDrag(
+    event,
+    node
+){
+
+    if(
+        connecting ||
+        settingRoot ||
+        deletingEdge
+    )
+        return;
+
+
+    const rect=
+        board.getBoundingClientRect();
+
+
+    dragData={
+
+        node:node,
+
+        offsetX:
+            event.clientX
+            -
+            rect.left
+            -
+            node.x,
+
+        offsetY:
+            event.clientY
+            -
+            rect.top
+            -
+            node.y,
+
+        moved:false
+
+    };
+
+
+    node.element.setPointerCapture(
+        event.pointerId
+    );
+
+
+    const move=e=>{
+
+        if(!dragData)
+            return;
+
+
+        const dx=
+            e.clientX-event.clientX;
+
+        const dy=
+            e.clientY-event.clientY;
+
+
+        if(
+            Math.abs(dx)>3 ||
+            Math.abs(dy)>3
+        ){
+
+            dragData.moved=true;
+
+        }
+
+
+        const r=
+            board.getBoundingClientRect();
+
+
+        node.x=
+            Math.max(
+                5,
+                Math.min(
+                    board.clientWidth-60,
+                    e.clientX-r.left-dragData.offsetX
+                )
+            );
+
+
+        node.y=
+            Math.max(
+                5,
+                Math.min(
+                    board.clientHeight-60,
+                    e.clientY-r.top-dragData.offsetY
+                )
+            );
+
+
+        node.element.style.left=
+            node.x+"px";
+
+        node.element.style.top=
+            node.y+"px";
+
+
+        drawEdges();
+
+    };
+
+
+    const up=()=>{
+
+        node.element.removeEventListener(
+            "pointermove",
+            move
+        );
+
+        node.element.removeEventListener(
+            "pointerup",
+            up
+        );
+
+        setTimeout(
+            ()=>{
+                dragData=null;
+            },
+            0
+        );
+
+    };
+
+
+    node.element.addEventListener(
+        "pointermove",
+        move
+    );
+
+    node.element.addEventListener(
+        "pointerup",
+        up
+    );
+
+}
+
+
+/* =====================================================
+   NODE CLICK
+===================================================== */
+
+function nodeClick(node){
+
+    /* CONNECT */
+
+    if(connecting){
+
+        if(
+            selectedNodes.length===0
+        ){
+
+            selectedNodes.push(node);
+
+            node.element.classList.add(
+                "selected"
+            );
+
+            setMessage(
+                `Node ${node.label} dipilih. Pilih node kedua.`,
+                "info"
+            );
+
+            return;
+        }
+
+
+        const first=
+            selectedNodes[0];
+
+        const second=node;
+
+
+        if(
+            first.id===
+            second.id
+        ){
+
+            setMessage(
+                "⚠️ Tidak dapat menghubungkan node dengan dirinya sendiri.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        const exists=
+            edges.some(
+                e=>
+                    (
+                        e.from===first.id &&
+                        e.to===second.id
+                    )
+                    ||
+                    (
+                        e.from===second.id &&
+                        e.to===first.id
+                    )
+            );
+
+
+        if(exists){
+
+            setMessage(
+                "⚠️ Hubungan tersebut sudah ada.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        edges.push({
+
+            from:first.id,
+
+            to:second.id
+
+        });
+
+
+        /*
+           PENGECEKAN LANGSUNG
+           BENAR / SALAH
+        */
+
+        const level=
+            levels[currentLevel];
+
+        let isValid=true;
+
+        let wrongReason="";
+
+
+        if(
+            level.mode==="tree" &&
+            hasCycle()
+        ){
+
+            isValid=false;
+
+            wrongReason=
+                "membentuk siklus (cycle) sehingga tidak diperbolehkan pada Tree";
+
+            edges.pop();
+
+        }
+
+
+        clearSelection();
+
+        connecting=false;
+
+        document
+            .getElementById("connectButton")
+            .classList.remove("active");
+
+
+        drawEdges();
+
+        updateStats();
+
+
+        if(isValid){
+
+            setMessage(
+                `✅ Benar! ${first.label} terhubung dengan ${second.label}.`,
+                "success"
+            );
+
+        }
+        else{
+
+            setMessage(
+                `❌ Salah! Hubungan ${first.label}-${second.label} ${wrongReason}. Hubungan dibatalkan otomatis.`,
+                "error"
+            );
+
+        }
+
+        return;
+    }
+
+
+    /* DELETE EDGE */
+
+    if(deletingEdge){
+
+        if(
+            selectedNodes.length===0
+        ){
+
+            selectedNodes.push(node);
+
+            node.element.classList.add(
+                "selected"
+            );
+
+            setMessage(
+                `Node ${node.label} dipilih. Pilih node kedua untuk menghapus edge di antara keduanya.`,
+                "info"
+            );
+
+            return;
+        }
+
+
+        const first=
+            selectedNodes[0];
+
+        const second=node;
+
+
+        if(
+            first.id===
+            second.id
+        ){
+
+            setMessage(
+                "⚠️ Pilih dua node yang berbeda.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        const edgeIndex=
+            edges.findIndex(
+                e=>
+                    (
+                        e.from===first.id &&
+                        e.to===second.id
+                    )
+                    ||
+                    (
+                        e.from===second.id &&
+                        e.to===first.id
+                    )
+            );
+
+
+        if(edgeIndex===-1){
+
+            setMessage(
+                `⚠️ Tidak ada edge antara ${first.label} dan ${second.label}.`,
+                "error"
+            );
+
+            clearSelection();
+
+            deletingEdge=false;
+
+            document
+                .getElementById("deleteEdgeButton")
+                .classList.remove("active");
+
+            return;
+        }
+
+
+        edges.splice(edgeIndex,1);
+
+
+        clearSelection();
+
+        deletingEdge=false;
+
+        document
+            .getElementById("deleteEdgeButton")
+            .classList.remove("active");
+
+
+        drawEdges();
+
+        updateStats();
+
+
+        setMessage(
+            `🗑️ Edge antara ${first.label} dan ${second.label} dihapus.`,
+            "success"
+        );
+
+        return;
+    }
+
+
+    /* ROOT */
+
+    if(settingRoot){
+
+        setRootNode(node);
+
+        settingRoot=false;
+
+        return;
+    }
+
+
+    /* NORMAL */
+
+    clearSelection();
+
+    selectedNodes.push(node);
+
+    node.element.classList.add(
+        "selected"
+    );
+
+}
+
+
+/* =====================================================
+   CONNECT
+===================================================== */
+
+function startConnect(){
+
+    settingRoot=false;
+
+    deletingEdge=false;
+
+    clearSelection();
+
+    connecting=true;
+
+    document
+        .getElementById("connectButton")
+        .classList.add("active");
+
+    document
+        .getElementById("deleteEdgeButton")
+        .classList.remove("active");
+
+    setMessage(
+        "🔗 Klik node pertama kemudian node kedua.",
+        "info"
+    );
+
+}
+
+
+/* =====================================================
+   DELETE EDGE
+===================================================== */
+
+function startDeleteEdge(){
+
+    connecting=false;
+
+    settingRoot=false;
+
+    clearSelection();
+
+    deletingEdge=true;
+
+    document
+        .getElementById("connectButton")
+        .classList.remove("active");
+
+    document
+        .getElementById("deleteEdgeButton")
+        .classList.add("active");
+
+    setMessage(
+        "🗑️ Klik dua node yang edge-nya ingin dihapus.",
+        "info"
+    );
+
+}
+
+
+/* =====================================================
+   ROOT
+===================================================== */
+
+function setRoot(){
+
+    if(nodes.length===0){
+
+        setMessage(
+            "⚠️ Node belum tersedia.",
+            "error"
+        );
+
+        return;
+    }
+
+    connecting=false;
+
+    deletingEdge=false;
+
+    clearSelection();
+
+    settingRoot=true;
+
+    document
+        .getElementById("connectButton")
+        .classList.remove("active");
+
+    document
+        .getElementById("deleteEdgeButton")
+        .classList.remove("active");
+
+    setMessage(
+        "🌱 Klik node yang akan menjadi Root.",
+        "info"
+    );
+
+}
+
+
+function setRootNode(node){
+
+    nodes.forEach(
+        n=>{
+
+            n.root=false;
+
+            n.element.classList.remove(
+                "root"
+            );
+
+        }
+    );
+
+
+    node.root=true;
+
+    node.element.classList.add(
+        "root"
+    );
+
+    setMessage(
+        `🌱 ${node.label} menjadi Root.`,
+        "success"
+    );
+
+}
+
+
+/* =====================================================
+   CLEAR
+===================================================== */
+
+function clearSelection(){
+
+    selectedNodes.forEach(
+        n=>{
+
+            if(n.element){
+
+                n.element.classList.remove(
+                    "selected"
+                );
+
+            }
+
+        }
+    );
+
+    selectedNodes=[];
+
+}
+
+
+/* =====================================================
+   CANCEL
+===================================================== */
+
+function cancelAction(){
+
+    connecting=false;
+
+    settingRoot=false;
+
+    deletingEdge=false;
+
+    clearSelection();
+
+    document
+        .getElementById("connectButton")
+        .classList.remove("active");
+
+    document
+        .getElementById("deleteEdgeButton")
+        .classList.remove("active");
+
+    setMessage(
+        "❌ Mode dibatalkan.",
+        "info"
+    );
+
+}
+
+
+/* =====================================================
+   DRAW EDGES
+===================================================== */
+
+function drawEdges(){
+
+    edgesGroup.innerHTML="";
+
+
+    edges.forEach(
+        edge=>{
+
+            const from=
+                nodes.find(
+                    n=>n.id===edge.from
+                );
+
+            const to=
+                nodes.find(
+                    n=>n.id===edge.to
+                );
+
+
+            if(!from || !to)
+                return;
+
+
+            const line=
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "line"
+                );
+
+
+            line.setAttribute(
+                "x1",
+                from.x+27.5
+            );
+
+            line.setAttribute(
+                "y1",
+                from.y+27.5
+            );
+
+            line.setAttribute(
+                "x2",
+                to.x+27.5
+            );
+
+            line.setAttribute(
+                "y2",
+                to.y+27.5
+            );
+
+
+            line.classList.add(
+                "edge-line"
+            );
+
+
+            edgesGroup.appendChild(
+                line
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+function updateStats(){
+
+    document.getElementById(
+        "score"
+    ).textContent=score;
+
+    document.getElementById(
+        "level"
+    ).textContent=
+        `${currentLevel+1}/${levels.length}`;
+
+    document.getElementById(
+        "timer"
+    ).textContent=
+        formatTime(timeLeft);
+
+    document.getElementById(
+        "edgeCount"
+    ).textContent=
+        edges.length;
+
+}
+
+
+/* =====================================================
+   CHECK CONNECTED
+===================================================== */
+
+function isConnected(){
+
+    if(nodes.length===0)
+        return false;
+
+
+    const visited=new Set();
+
+    const queue=[
+        nodes[0].id
+    ];
+
+    visited.add(
+        nodes[0].id
+    );
+
+
+    while(queue.length){
+
+        const current=
+            queue.shift();
+
+
+        edges.forEach(
+            edge=>{
+
+                let next=null;
+
+
+                if(
+                    edge.from===current
+                ){
+
+                    next=edge.to;
+
+                }
+                else if(
+                    edge.to===current
+                ){
+
+                    next=edge.from;
+
+                }
+
+
+                if(
+                    next!==null &&
+                    !visited.has(next)
+                ){
+
+                    visited.add(next);
+
+                    queue.push(next);
+
+                }
+
+            }
+        );
+
+    }
+
+
+    return (
+        visited.size===
+        nodes.length
+    );
+
+}
+
+
+/* =====================================================
+   CYCLE
+===================================================== */
+
+function hasCycle(){
+
+    const visited=new Set();
+
+
+    function dfs(
+        current,
+        parent
+    ){
+
+        visited.add(current);
+
+
+        for(
+            const edge of edges
+        ){
+
+            let next=null;
+
+
+            if(
+                edge.from===current
+            ){
+
+                next=edge.to;
+
+            }
+            else if(
+                edge.to===current
+            ){
+
+                next=edge.from;
+
+            }
+
+
+            if(next===null)
+                continue;
+
+
+            if(
+                !visited.has(next)
+            ){
+
+                if(
+                    dfs(
+                        next,
+                        current
+                    )
+                ){
+
+                    return true;
+
+                }
+
+            }
+            else if(
+                next!==parent
+            ){
+
+                return true;
+
+            }
+
+        }
+
+
+        return false;
+
+    }
+
+
+    for(
+        const node of nodes
+    ){
+
+        if(
+            !visited.has(node.id)
+        ){
+
+            if(
+                dfs(
+                    node.id,
+                    null
+                )
+            ){
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =====================================================
+   CHECK STRUCTURE
+===================================================== */
+
+function checkMission(){
+
+    const level=
+        levels[currentLevel];
+
+
+    if(
+        nodes.length<
+        level.nodes
+    ){
+
+        showResult(
+            "❌",
+            "Node Belum Cukup",
+            `Minimal ${level.nodes} node diperlukan.`,
+            "retry"
+        );
+
+        return;
+    }
+
+
+    if(
+        edges.length<
+        level.edges
+    ){
+
+        showResult(
+            "❌",
+            "Edge Belum Cukup",
+            `Minimal ${level.edges} edge diperlukan.`,
+            "retry"
+        );
+
+        return;
+    }
+
+
+    if(
+        !isConnected()
+    ){
+
+        showResult(
+            "🔌",
+            "Struktur Belum Terhubung",
+            "Semua node harus berada dalam satu jaringan.",
+            "retry"
+        );
+
+        return;
+    }
+
+
+    if(
+        level.mode==="tree"
+    ){
+
+        const roots=
+            nodes.filter(
+                n=>n.root
+            );
+
+
+        if(
+            roots.length!==1
+        ){
+
+            showResult(
+                "🌱",
+                "Root Belum Benar",
+                "Tree harus memiliki tepat satu Root.",
+                "retry"
+            );
+
+            return;
+        }
+
+
+        if(
+            edges.length!==
+            nodes.length-1
+        ){
+
+            showResult(
+                "⚠️",
+                "Jumlah Edge Salah",
+                `Tree dengan ${nodes.length} node harus memiliki ${nodes.length-1} edge.`,
+                "retry"
+            );
+
+            return;
+        }
+
+
+        if(
+            hasCycle()
+        ){
+
+            showResult(
+                "🔄",
+                "Ada Cycle",
+                "Tree tidak boleh memiliki siklus.",
+                "retry"
+            );
+
+            return;
+        }
+
+    }
+
+
+    /*
+       STRUKTUR BENAR
+       MASUK QUIZ
+    */
+
+    startQuiz();
+
+}
+
+
+/* =====================================================
+   START QUIZ
+===================================================== */
+
+function startQuiz(){
+
+    quizIndex=0;
+
+    quizScore=0;
+
+    showQuiz();
+
+}
+
+
+/* =====================================================
+   SHOW QUIZ
+===================================================== */
+
+function showQuiz(){
+
+    const level=
+        levels[currentLevel];
+
+    const quiz=
+        level.quiz[quizIndex];
+
+
+    document.getElementById(
+        "modalIcon"
+    ).textContent="🧠";
+
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent=
+        "Quiz Berbasis Kasus";
+
+
+    let html=`
+
+        <div class="quiz-card">
+
+            <div class="quiz-progress">
+                Soal ${quizIndex+1}
+                dari
+                ${level.quiz.length}
+            </div>
+
+            <div class="quiz-case">
+
+                <strong>📌 Kasus:</strong><br>
+
+                ${level.case}
+
+            </div>
+
+            <div class="quiz-question">
+
+                ${quiz.question}
+
+            </div>
+
+    `;
+
+
+    quiz.options.forEach(
+        (
+            option,
+            index
+        )=>{
+
+            html+=`
+
+                <button
+                    class="quiz-option"
+                    onclick="answerQuiz(${index})"
+                >
+
+                    ${String.fromCharCode(65+index)}.
+                    ${option}
+
+                </button>
+
+            `;
+
+        }
+    );
+
+
+    html+=`
+
+        </div>
+
+    `;
+
+
+    document.getElementById(
+        "modalMessage"
+    ).innerHTML=html;
+
+
+    document.getElementById(
+        "modalButton"
+    ).style.display="none";
+
+
+    document
+        .getElementById("resultModal")
+        .classList.add("show");
+
+}
+
+
+/* =====================================================
+   ANSWER QUIZ
+===================================================== */
+
+function answerQuiz(
+    selected
+){
+
+    const level=
+        levels[currentLevel];
+
+    const quiz=
+        level.quiz[quizIndex];
+
+    const buttons=
+        document.querySelectorAll(
+            ".quiz-option"
+        );
+
+
+    buttons.forEach(
+        button=>{
+            button.disabled=true;
+        }
+    );
+
+
+    const isCorrect=
+        selected===quiz.answer;
+
+
+    /*
+       SIMPAN KE RIWAYAT
+       UNTUK REKAP AKHIR
+    */
+
+    quizHistory.push({
+
+        level:level.title,
+
+        question:quiz.question,
+
+        yourAnswer:quiz.options[selected],
+
+        correctAnswer:quiz.options[quiz.answer],
+
+        isCorrect:isCorrect,
+
+        explanation:
+            quiz.explanation
+            ||""
+
+    });
+
+
+    if(isCorrect){
+
+        buttons[selected]
+            .classList.add(
+                "correct"
+            );
+
+        quizScore++;
+
+        score+=50;
+
+        gameMessage.textContent=
+            "✅ Jawaban benar! +50 poin.";
+
+    }
+    else{
+
+        buttons[selected]
+            .classList.add(
+                "wrong"
+            );
+
+        buttons[quiz.answer]
+            .classList.add(
+                "correct"
+            );
+
+        gameMessage.textContent=
+            "❌ Jawaban kurang tepat.";
+
+    }
+
+
+    /*
+       TAMPILKAN PENJELASAN
+       LANGSUNG DI MODAL
+    */
+
+    if(quiz.explanation){
+
+        const quizCard=
+            document.querySelector(
+                ".quiz-card"
+            );
+
+        if(quizCard){
+
+            const explainBox=
+                document.createElement(
+                    "div"
+                );
+
+            explainBox.className=
+                "quiz-explanation";
+
+            explainBox.innerHTML=
+                `💡 <strong>Penjelasan:</strong> ${quiz.explanation}`;
+
+            quizCard.appendChild(
+                explainBox
+            );
+
+        }
+
+    }
+
+
+    updateStats();
+
+
+    const nextButton=
+        document.getElementById(
+            "modalButton"
+        );
+
+
+    nextButton.style.display=
+        "block";
+
+
+    if(
+        quizIndex<
+        level.quiz.length-1
+    ){
+
+        nextButton.textContent=
+            "Soal Berikutnya →";
+
+        modalMode="quizNext";
+
+    }
+    else{
+
+        nextButton.textContent=
+            "Lanjut ke Level →";
+
+        modalMode="quizFinish";
+
+    }
+
+}
+
+
+/* =====================================================
+   MODAL ACTION
+===================================================== */
+
+function modalAction(){
+
+    if(
+        modalMode==="quizNext"
+    ){
+
+        quizIndex++;
+
+        showQuiz();
+
+        return;
+    }
+
+
+    if(
+        modalMode==="quizFinish"
+    ){
+
+        closeModal();
+
+        const level=
+            levels[currentLevel];
+
+
+        const bonus=
+            Math.floor(
+                timeLeft/5
+            );
+
+
+        score+=
+            (currentLevel+1)*100
+            +
+            bonus;
+
+
+        updateStats();
+
+
+        if(
+            currentLevel===
+            levels.length-1
+        ){
+
+            finishGame();
+
+            return;
+        }
+
+
+        currentLevel++;
+
+        loadLevel();
+
+        return;
+    }
+
+
+    if(
+        modalMode==="finish"
+    ){
+
+        closeModal();
+
+        return;
+    }
+
+
+    closeModal();
+
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+function showResult(
+    icon,
+    title,
+    message,
+    mode
+){
+
+    document.getElementById(
+        "modalIcon"
+    ).textContent=icon;
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent=title;
+
+    document.getElementById(
+        "modalMessage"
+    ).innerHTML=message;
+
+
+    modalMode=mode;
+
+
+    const button=
+        document.getElementById(
+            "modalButton"
+        );
+
+
+    if(
+        mode==="retry"
+    ){
+
+        button.style.display="block";
+
+        button.textContent=
+            "Coba Lagi";
+
+    }
+    else{
+
+        button.style.display="block";
+
+        button.textContent=
+            "Tutup";
+
+    }
+
+
+    document
+        .getElementById("resultModal")
+        .classList.add("show");
+
+}
+
+
+/* =====================================================
+   CLOSE
+===================================================== */
+
+function closeModal(){
+
+    document
+        .getElementById("resultModal")
+        .classList.remove(
+            "show"
+        );
+
+}
+
+
+/* =====================================================
+   BUILD RECAP HTML
+   (rekap semua soal dari seluruh level: benar/salah,
+   jawaban yang dipilih, jawaban yang benar, dan
+   penjelasannya)
+===================================================== */
+
+function buildRecapHtml(){
+
+    const totalCorrect=
+        quizHistory.filter(
+            item=>item.isCorrect
+        ).length;
+
+    const totalWrong=
+        quizHistory.length
+        -
+        totalCorrect;
+
+
+    let html=
+        `
+        <div class="recap-summary">
+
+            <div class="badge correct">
+                ✅ Benar: ${totalCorrect}
+            </div>
+
+            <div class="badge wrong">
+                ❌ Salah: ${totalWrong}
+            </div>
+
+        </div>
+
+        <div class="recap-list">
+        `;
+
+
+    quizHistory.forEach(
+        (
+            item,
+            index
+        )=>{
+
+            html+=
+                `
+                <div class="recap-item ${
+                    item.isCorrect
+                    ?"is-correct"
+                    :"is-wrong"
+                }">
+
+                    <div class="recap-head">
+                        ${index+1}.
+                        ${escapeHtml(item.level)}
+                    </div>
+
+                    <div class="recap-question">
+                        ${escapeHtml(item.question)}
+                    </div>
+                `;
+
+
+            if(item.isCorrect){
+
+                html+=
+                    `
+                    <div class="recap-answer your-correct">
+                        ✅ Jawabanmu:
+                        <strong>${escapeHtml(item.yourAnswer)}</strong>
+                        (Benar)
+                    </div>
+                    `;
+
+            }
+            else{
+
+                html+=
+                    `
+                    <div class="recap-answer your-wrong">
+                        ❌ Jawabanmu:
+                        <strong>${escapeHtml(item.yourAnswer)}</strong>
+                        (Salah)
+                    </div>
+
+                    <div class="recap-answer your-correct">
+                        ✅ Jawaban benar:
+                        <strong>${escapeHtml(item.correctAnswer)}</strong>
+                    </div>
+                    `;
+
+            }
+
+
+            if(item.explanation){
+
+                html+=
+                    `
+                    <div class="recap-explain">
+                        💡 ${escapeHtml(item.explanation)}
+                    </div>
+                    `;
+
+            }
+
+
+            html+=
+                `
+                </div>
+                `;
+
+        }
+    );
+
+
+    html+=
+        `
+        </div>
+        `;
+
+
+    return html;
+
+}
+
+
+/* =====================================================
+   FINISH GAME
+===================================================== */
+
+function finishGame(){
+
+    clearInterval(
+        timerInterval
+    );
+
+    saveScore();
+
+
+    document.getElementById(
+        "modalIcon"
+    ).textContent="🏆";
+
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent=
+        "Permainan Selesai!";
+
+
+    document.getElementById(
+        "modalMessage"
+    ).innerHTML=
+        `
+        <strong>${escapeHtml(player)}</strong>,
+        kamu berhasil menyelesaikan seluruh misi
+        Tree & Graph.
+        <br><br>
+        🎯 Skor Akhir:
+        <strong>${score}</strong>
+
+        <br><br>
+
+        <strong>📋 Rekap Jawaban Quiz</strong>
+
+        ${buildRecapHtml()}
+        `;
+
+
+    document.getElementById(
+        "modalButton"
+    ).style.display="block";
+
+    document.getElementById(
+        "modalButton"
+    ).textContent="Tutup";
+
+
+    modalMode="finish";
+
+
+    document
+        .getElementById("resultModal")
+        .classList.add("show");
+
+}
+
+
+/* =====================================================
+   LEADERBOARD
+===================================================== */
+
+function saveScore(){
+
+    if(!player)
+        return;
+
+
+    const data=
+        JSON.parse(
+            localStorage.getItem(
+                "treeGraphLeaderboard"
+            )
+            ||
+            "[]"
+        );
+
+
+    data.push({
+
+        name:player,
+
+        score:score,
+
+        date:
+            new Date()
+            .toLocaleDateString(
+                "id-ID"
+            )
+
+    });
+
+
+    data.sort(
+        (a,b)=>
+            b.score-a.score
+    );
+
+
+    localStorage.setItem(
+        "treeGraphLeaderboard",
+        JSON.stringify(
+            data.slice(0,10)
+        )
+    );
+
+
+    loadLeaderboard();
+
+}
+
+
+/* =====================================================
+   LOAD LEADERBOARD
+===================================================== */
+
+function loadLeaderboard(){
+
+    const data=
+        JSON.parse(
+            localStorage.getItem(
+                "treeGraphLeaderboard"
+            )
+            ||
+            "[]"
+        );
+
+
+    const body=
+        document.getElementById(
+            "leaderboardBody"
+        );
+
+
+    body.innerHTML="";
+
+
+    if(
+        data.length===0
+    ){
+
+        body.innerHTML=
+            `
+            <tr>
+                <td colspan="3">
+                    Belum ada skor
+                </td>
+            </tr>
+            `;
+
+        return;
+    }
+
+
+    data.forEach(
+        (
+            item,
+            index
+        )=>{
+
+            const row=
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML=
+                `
+                <td>
+                    ${index+1}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        item.name
+                    )}
+                </td>
+
+                <td>
+                    ${item.score}
+                </td>
+                `;
+
+
+            body.appendChild(row);
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   ESCAPE
+===================================================== */
+
+function escapeHtml(
+    text
+){
+
+    const div=
+        document.createElement(
+            "div"
+        );
+
+    div.textContent=text;
+
+    return div.innerHTML;
+
+}
+
+
+/* =====================================================
+   CLEAR LEADERBOARD
+===================================================== */
+
+function clearLeaderboard(){
+
+    if(
+        !confirm(
+            "Hapus semua leaderboard?"
+        )
+    ){
+
+        return;
+    }
+
+
+    localStorage.removeItem(
+        "treeGraphLeaderboard"
+    );
+
+
+    loadLeaderboard();
+
+}
+
+
+/* =====================================================
+   BOARD CLICK
+===================================================== */
+
+board.addEventListener(
+    "click",
+    event=>{
+
+        if(
+            event.target===board
+        ){
+
+            clearSelection();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    event=>{
+
+        if(
+            event.key==="Escape"
+        ){
+
+            cancelAction();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL
+===================================================== */
+
+loadLeaderboard();
+
+</script>
+
+</body>
+</html>
