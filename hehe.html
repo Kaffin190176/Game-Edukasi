@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Kuis Rebutan Tim - Unplugged Coding & Flowchart</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(160deg, #0f172a, #1e293b 60%, #312e81);
+    color: #f1f5f9;
+    min-height: 100vh;
+  }
+
+  /* ============ HEADER ============ */
+  header {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 14px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-bottom: 2px solid rgba(255,255,255,.08);
+  }
+  header h1 { font-size: 22px; }
+  header p { font-size: 12px; opacity: .7; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .turn-badge {
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 14px;
+    box-shadow: 0 4px 14px rgba(234,88,12,.4);
+  }
+  .sound-btn {
+    border: 0;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,.12);
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+  }
+  .sound-btn.on { background: #16a34a; }
+
+  /* ============ SETUP ============ */
+  .setup-screen {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+  }
+  .setup-card {
+    width: 100%;
+    max-width: 820px;
+    background: #ffffff;
+    color: #1e293b;
+    border-radius: 22px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .setup-card h2 { text-align: center; font-size: 26px; margin-bottom: 6px; }
+  .setup-card > p.intro { text-align: center; color: #64748b; margin-bottom: 18px; font-size: 14px; }
+
+  .team-count-picker {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .team-count-btn {
+    padding: 10px 22px;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .team-count-btn.selected {
+    border-color: #2563eb;
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .team-setup-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .team-setup-box {
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .team-setup-box.filled { border-color: #16a34a; background: #f0fdf4; }
+  .team-setup-box label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #64748b;
+    text-transform: uppercase;
+  }
+  .team-name-input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .animal-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .animal-option {
+    font-size: 22px;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background: #f1f5f9;
+  }
+  .animal-option:hover { background: #e2e8f0; }
+  .animal-option.selected { border-color: #2563eb; background: #dbeafe; }
+  .animal-option.taken { opacity: .25; cursor: not-allowed; }
+  .start-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 15px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .start-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ============ GAME ============ */
+  .game-container { display: none; padding: 18px; }
+  .scoreboard {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .team-score-card {
+    background: rgba(255,255,255,.08);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all .2s;
+  }
+  .team-score-card.active-turn {
+    border-color: #f59e0b;
+    background: rgba(245,158,11,.15);
+    transform: translateY(-3px);
+  }
+  .team-score-card .mascot { font-size: 34px; }
+  .team-score-card .tname { font-size: 13px; font-weight: bold; margin: 4px 0 2px; }
+  .team-score-card .tscore { font-size: 22px; font-weight: bold; color: #facc15; }
+
+  .main-area {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 16px;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .card-slot {
+    aspect-ratio: 3 / 4;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #4338ca, #6d28d9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 6px 16px rgba(0,0,0,.35);
+    transition: transform .15s;
+    position: relative;
+  }
+  .card-slot:hover { transform: translateY(-4px) scale(1.03); }
+  .card-slot .qmark { font-size: 30px; opacity: .85; }
+  .card-slot .cnum { font-size: 11px; opacity: .7; margin-top: 4px; }
+  .card-slot.used {
+    background: #1e293b;
+    cursor: default;
+    opacity: .45;
+    transform: none;
+  }
+  .card-slot.used:hover { transform: none; }
+  .card-slot .type-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 16px;
+  }
+
+  .side-panel {
+    background: rgba(255,255,255,.06);
+    border-radius: 14px;
+    padding: 14px;
+    max-height: 640px;
+    display: flex;
+    flex-direction: column;
+  }
+  .side-panel h3 { font-size: 14px; margin-bottom: 10px; }
+  .log-list {
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .log-item {
+    font-size: 11.5px;
+    line-height: 1.5;
+    background: rgba(255,255,255,.06);
+    padding: 8px 10px;
+    border-radius: 8px;
+    border-left: 3px solid #64748b;
+  }
+  .log-item.log-correct { border-left-color: #16a34a; }
+  .log-item.log-wrong { border-left-color: #dc2626; }
+  .log-item.log-steal { border-left-color: #eab308; }
+  .log-item.log-trap { border-left-color: #ec4899; }
+
+  .legend {
+    margin-top: 12px;
+    font-size: 11px;
+    opacity: .75;
+    line-height: 1.6;
+  }
+
+  .reset-link {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 11px;
+    color: #94a3b8;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* ============ MODAL ============ */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, .8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    width: 100%;
+    max-width: 620px;
+    background: #ffffff;
+    color: #1e293b;
+    border-radius: 20px;
+    padding: 28px;
+    text-align: center;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .modal-card h2 { margin-bottom: 8px; }
+  .modal-card p.sub { color: #64748b; margin-bottom: 18px; font-size: 14px; }
+
+  .type-banner {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .type-banner.poin { background: #fef9c3; color: #854d0e; }
+  .type-banner.steal { background: #fef3c7; color: #92400e; }
+  .type-banner.trap { background: #fce7f3; color: #9d174d; }
+
+  .decision-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .decision-btn {
+    padding: 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+  }
+  .decision-btn:hover { background: #f8fafc; border-color: #2563eb; }
+  .decision-btn.self { border-color: #16a34a; background: #f0fdf4; }
+
+  .quiz-case {
+    background: #f8fafc;
+    border-left: 5px solid #6d28d9;
+    padding: 14px;
+    border-radius: 8px;
+    text-align: left;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .quiz-question { font-size: 17px; font-weight: bold; margin-bottom: 12px; text-align: left; }
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px;
+    margin: 8px 0;
+    border: 2px solid #e2e8f0;
+    border-radius: 9px;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .quiz-option:hover { background: #f8fafc; }
+  .quiz-option.correct { background: #dcfce7; border-color: #16a34a; }
+  .quiz-option.wrong { background: #fee2e2; border-color: #dc2626; }
+
+  .result-box {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: left;
+  }
+  .result-box.good { background: #dcfce7; color: #166534; }
+  .result-box.bad { background: #fee2e2; color: #b91c1c; }
+  .result-box.neutral { background: #eff6ff; color: #1d4ed8; }
+
+  .quiz-explanation {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,.55);
+    border-left: 4px solid currentColor;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  .steal-target-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px;
+    margin: 8px 0;
+    border: 2px solid #eab308;
+    border-radius: 10px;
+    background: #fefce8;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .steal-target-btn:hover { background: #fef9c3; }
+
+  .modal-next-btn {
+    margin-top: 18px;
+    width: 100%;
+    padding: 13px;
+    border: 0;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .final-rank {
+    text-align: left;
+    margin-top: 14px;
+  }
+  .final-rank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    margin-bottom: 8px;
+  }
+  .final-rank-item .medal { font-size: 24px; width: 32px; text-align: center; }
+  .final-rank-item .mascot2 { font-size: 26px; }
+  .final-rank-item .fname { flex: 1; font-weight: bold; font-size: 14px; }
+  .final-rank-item .fscore { font-weight: bold; color: #ea580c; font-size: 16px; }
+
+  @media (max-width: 900px) {
+    .main-area { grid-template-columns: 1fr; }
+    .board { grid-template-columns: repeat(4, 1fr); }
+    .team-setup-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<audio id="bgMusic" src="backsound.mp3" loop preload="auto"></audio>
+
+<header>
+  <div>
+    <h1>🎮 Kuis Rebutan Tim</h1>
+    <p>Materi: Unplugged Coding & Flowchart · 20 kartu misteri — poin, rebut, dan jebakan!</p>
+  </div>
+  <div class="header-right">
+    <button class="sound-btn" id="soundToggle" onclick="toggleSound()">🔇 Suara: Off</button>
+    <div class="turn-badge" id="turnBadge">Giliran: -</div>
+  </div>
+</header>
+
+<!-- ================= SETUP ================= -->
+<section class="setup-screen" id="setupScreen">
+  <div class="setup-card">
+    <h2>🐾 Siapkan Tim Kalian</h2>
+    <p class="intro">Pilih jumlah tim (2–4), isi nama tim, lalu pilih satu maskot hewan untuk masing-masing tim (tidak boleh sama).</p>
+
+    <div class="team-count-picker" id="teamCountPicker"></div>
+
+    <div class="team-setup-grid" id="teamSetupGrid"></div>
+
+    <button class="start-btn" id="startBtn" onclick="startGame()" disabled>
+      🚀 Mulai Permainan
+    </button>
+  </div>
+</section>
+
+<!-- ================= GAME ================= -->
+<main class="game-container" id="gameContainer">
+
+  <div class="scoreboard" id="scoreboard"></div>
+
+  <div class="main-area">
+
+    <div class="board" id="board"></div>
+
+    <aside class="side-panel">
+      <h3>📜 Log Permainan</h3>
+      <div class="log-list" id="logList"></div>
+
+      <div class="legend">
+        💰 Kartu Poin (10/20/30)<br>
+        🦹 Kartu Rebut (curi poin tim lain)<br>
+        💀 Kartu Jebakan (bisa rugi poin)<br>
+        <em>Jenis kartu baru terlihat setelah dibuka!</em>
+      </div>
+
+      <div class="reset-link" onclick="confirmReset()">🔄 Mulai Ulang Permainan</div>
+    </aside>
+
+  </div>
+
+</main>
+
+<!-- ================= MODAL ================= -->
+<div class="modal" id="modal">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<script>
+
+/* =========================================================
+   DATA HEWAN & TIM
+========================================================= */
+const ANIMALS = ["🦁","🐯","🐼","🦊","🐰","🐸","🐵","🦉","🐺","🐧","🐢","🦅"];
+const MIN_TEAMS = 2;
+const MAX_TEAMS = 4;
+
+let teamCount = 4;
+let teams = makeEmptyTeams(teamCount);
+
+function makeEmptyTeams(n){
+  return Array.from({ length: n }, () => ({ name: "", animal: "", score: 0 }));
+}
+
+/* =========================================================
+   BANK SOAL
+========================================================= */
+const poinQuestions = [
+  { value: 10, question: "Unplugged coding adalah cara belajar konsep pemrograman tanpa menggunakan...", options: ["Guru", "Kertas", "Teman", "Komputer"], answer: 3, explanation: "Unplugged coding sengaja dirancang tanpa komputer — materinya disampaikan lewat kertas dan permainan peran, supaya siswa fokus pada konsep berpikirnya dulu." },
+  { value: 10, question: "Kegiatan unplugged coding biasanya memakai...", options: ["Aplikasi coding", "Internet", "Kertas dan permainan peran", "Laptop"], answer: 2, explanation: "Karena tanpa komputer, unplugged coding memakai media sederhana seperti kertas dan permainan peran untuk mensimulasikan instruksi/algoritma." },
+  { value: 10, question: "Inti dari koding menurut materi ini bukanlah mengetik di layar, melainkan...", options: ["Kecepatan tangan", "Hafalan", "Kemampuan menggambar", "Cara berpikir"], answer: 3, explanation: "Koding pada dasarnya melatih cara berpikir runtut (computational thinking), bukan sekadar kemampuan mengetik atau menghafal." },
+  { value: 10, question: "Flowchart adalah bentuk visual dari...", options: ["Warna", "Emosi", "Algoritma", "Musik"], answer: 2, explanation: "Flowchart menggambarkan langkah-langkah algoritma dalam bentuk simbol dan alur visual, sehingga lebih mudah dipahami." },
+  { value: 20, question: "Simbol oval dalam flowchart disebut...", options: ["Proses", "Keputusan", "Konektor", "Terminator"], answer: 3, explanation: "Simbol oval disebut Terminator — namanya menandakan simbol ini ada di titik terminal (awal/akhir) sebuah flowchart." },
+  { value: 20, question: "Simbol oval digunakan untuk menandai...", options: ["Satu langkah kegiatan", "Hasil dokumen", "Pertanyaan Ya/Tidak", "Mulai dan Selesai"], answer: 3, explanation: "Sebagai Terminator, oval selalu diletakkan di ujung awal (Mulai) dan ujung akhir (Selesai) sebuah flowchart." },
+  { value: 20, question: "Simbol kotak/persegi panjang menunjukkan...", options: ["Titik akhir", "Pertanyaan", "Satu langkah proses/kegiatan", "Data yang disambungkan"], answer: 2, explanation: "Kotak/persegi panjang adalah simbol Proses, dipakai untuk menuliskan satu langkah kegiatan, misalnya 'Nyalakan kompor'." },
+  { value: 20, question: "Simbol belah ketupat digunakan untuk menunjukkan...", options: ["Satu langkah proses", "Dokumen", "Pertanyaan/kondisi dengan alur bercabang", "Titik mulai"], answer: 2, explanation: "Belah ketupat adalah simbol Keputusan — dipakai untuk pertanyaan Ya/Tidak yang membuat alur flowchart bercabang." },
+  { value: 30, question: "Simbol jajaran genjang (miring) digunakan untuk...", options: ["Memasukkan data atau menampilkan hasil", "Menandai keputusan", "Menandai proses", "Menyambung alur"], answer: 0, explanation: "Jajaran genjang adalah simbol Input/Output, dipakai saat flowchart memasukkan data atau menampilkan suatu hasil." },
+  { value: 30, question: "Simbol kotak dengan alas bergelombang menunjukkan...", options: ["Pertanyaan Ya/Tidak", "Titik awal", "Hasil berupa dokumen/laporan", "Satu langkah proses"], answer: 2, explanation: "Kotak beralas bergelombang adalah simbol Dokumen, dipakai saat keluaran suatu proses berupa dokumen atau laporan." },
+  { value: 30, question: "Simbol lingkaran kecil berisi huruf/angka (A, B, 1, 2) berfungsi untuk...", options: ["Menunjukkan keputusan", "Menunjukkan proses", "Menunjukkan dokumen", "Menyambung alur yang terputus (penghubung)"], answer: 3, explanation: "Lingkaran kecil berlabel adalah simbol Penghubung (connector), dipakai untuk menyambung alur flowchart yang terputus, misalnya karena pindah halaman." },
+  { value: 30, question: "Simbol kotak dengan garis ganda di kedua sisi menunjukkan...", options: ["Arah alur", "Dokumen", "Titik mulai", "Proses yang detailnya ada di flowchart terpisah (sub-proses)"], answer: 3, explanation: "Kotak bergaris ganda adalah simbol Sub-proses/Predefined Process — detail langkahnya digambarkan di flowchart yang terpisah." }
+];
+
+const stealQuestions = [
+  { value: 20, question: "Pada contoh flowchart membuat mi instan, langkah pertama setelah \"Mulai\" adalah...", options: ["Tambah bumbu", "Masukkan mi", "Rebus air sampai mendidih", "Tiriskan mi"], answer: 2, explanation: "Urutan yang benar dimulai dengan merebus air sampai mendidih, baru mi bisa dimasukkan — kalau ditukar, prosesnya tidak akan berhasil." },
+  { value: 20, question: "Jika urutan langkah pada flowchart mi instan ditukar, maka menurut materi hasilnya akan...", options: ["Lebih cepat", "Tidak berpengaruh", "Tetap benar", "Salah"], answer: 3, explanation: "Flowchart bekerja berdasarkan instruksi yang runtut (sequence). Kalau urutannya ditukar, misalnya mi dimasukkan sebelum air mendidih, hasilnya jadi salah." },
+  { value: 20, question: "Jika jawaban \"Apakah jalan aman?\" adalah Ya, langkah selanjutnya pada flowchart menyeberang jalan adalah...", options: ["Menyeberang dengan cepat dan lurus", "Tunggu sebentar", "Kembali ke tepi jalan", "Berhenti total"], answer: 0, explanation: "Simbol Keputusan membagi flowchart menjadi dua cabang: kalau jawabannya Ya (jalan aman), maka langkah selanjutnya adalah menyeberang dengan cepat dan lurus." },
+  { value: 20, question: "Menurut materi, simbol Keputusan pada flowchart menyeberang jalan mengajarkan konsep dasar...", options: ["Abstraksi", "Kondisi", "Dekomposisi", "Perulangan"], answer: 1, explanation: "Simbol Keputusan (belah ketupat) selalu berisi pertanyaan Ya/Tidak yang membuat alur bercabang — ini adalah konsep dasar Kondisi." }
+];
+
+const trapQuestions = [
+  { value: 15, question: "Computational thinking bisa dilatih...", options: ["Hanya di lab komputer", "Hanya oleh orang dewasa", "Hanya lewat buku", "Di mana saja, bahkan tanpa komputer"], answer: 3, explanation: "Computational thinking adalah cara berpikir, jadi bisa dilatih di mana saja dan kapan saja — bahkan tanpa komputer, seperti lewat unplugged coding." },
+  { value: 15, question: "Sebelum berhadapan dengan sintaks bahasa pemrograman, siswa perlu memahami...", options: ["Nama-nama bahasa pemrograman", "Harga laptop", "Konsep (urutan, kondisi, alur)", "Sejarah komputer"], answer: 2, explanation: "Materi menekankan bahwa konsep dasar (urutan, kondisi, alur) harus dikuasai lebih dulu, sebelum masuk ke sintaks bahasa pemrograman tertentu." },
+  { value: 15, question: "Flowchart disebut sebagai jembatan antara cara berpikir manusia dan cara kerja...", options: ["Alam", "Hewan", "Robot mainan", "Komputer"], answer: 3, explanation: "Flowchart membantu menerjemahkan cara berpikir manusia (langkah demi langkah) menjadi bentuk yang bisa dipahami dan dijalankan cara kerja komputer." },
+  { value: 15, question: "Resep masakan dan arah jalan sifatnya berupa...", options: ["Kalimat/teks bebas", "Simbol baku", "Diagram alur", "Kode program"], answer: 0, explanation: "Resep masakan dan petunjuk arah biasanya ditulis sebagai kalimat/teks bebas, berbeda dengan flowchart yang memakai simbol baku dan struktur alur." }
+];
+
+/* =========================================================
+   STATE PERMAINAN
+========================================================= */
+let cards = [];
+let currentPickerIndex = 0;
+let pendingCardId = null;
+let answererIndex = null;
+let revealedCard = null;
+let cardsUsedCount = 0;
+
+/* =========================================================
+   SUARA: MUSIK LATAR + EFEK SUARA (Web Audio API)
+   Tidak butuh file efek suara terpisah — semua efek
+   (benar, salah, giliran menjawab, rebut, jebakan, menang)
+   dibuat langsung lewat synth nada pendek.
+   Musik latar tetap memakai file backsound.mp3
+   (letakkan di folder yang sama dengan file HTML ini).
+========================================================= */
+let soundOn = false;
+let audioCtx = null;
+const bgMusic = document.getElementById("bgMusic");
+
+function getAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === "suspended"){
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playTone(freq, duration, type, delay, volume){
+  if(!soundOn) return;
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+
+    const startTime = ctx.currentTime + (delay || 0);
+
+    gain.gain.setValueAtTime(volume || 0.2, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  } catch(e){
+    /* abaikan jika audio tidak tersedia */
+  }
+}
+
+function sfxCardOpen(){ playTone(440, 0.08, "square", 0, 0.15); }
+function sfxDecision(){ playTone(523, 0.15, "sine", 0, 0.2); }
+function sfxCorrect(){
+  playTone(660, 0.12, "triangle", 0, 0.25);
+  playTone(880, 0.18, "triangle", 0.12, 0.25);
+}
+function sfxWrong(){ playTone(220, 0.3, "sawtooth", 0, 0.2); }
+function sfxSteal(){
+  playTone(784, 0.1, "square", 0, 0.2);
+  playTone(988, 0.1, "square", 0.1, 0.2);
+  playTone(1175, 0.18, "square", 0.2, 0.2);
+}
+function sfxTrap(){
+  playTone(180, 0.4, "sawtooth", 0, 0.25);
+  playTone(140, 0.5, "sawtooth", 0.15, 0.25);
+}
+function sfxWin(){
+  [523, 659, 784, 1046].forEach((f, i) => playTone(f, 0.25, "triangle", i * 0.18, 0.25));
+}
+
+function updateSoundButton(){
+  const btn = document.getElementById("soundToggle");
+  if(soundOn){
+    btn.textContent = "🔊 Suara: On";
+    btn.classList.add("on");
+  } else {
+    btn.textContent = "🔇 Suara: Off";
+    btn.classList.remove("on");
+  }
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+
+  if(soundOn){
+    getAudioCtx();
+    bgMusic.volume = 0.5;
+    bgMusic.play().catch(() => {});
+    sfxDecision();
+  } else {
+    bgMusic.pause();
+  }
+
+  updateSoundButton();
+}
+
+/* =========================================================
+   SETUP UI: JUMLAH TIM
+========================================================= */
+function renderTeamCountPicker(){
+  const box = document.getElementById("teamCountPicker");
+  box.innerHTML = "";
+
+  for(let n = MIN_TEAMS; n <= MAX_TEAMS; n++){
+    const btn = document.createElement("button");
+    btn.className = "team-count-btn" + (n === teamCount ? " selected" : "");
+    btn.textContent = `${n} Tim`;
+    btn.onclick = () => setTeamCount(n);
+    box.appendChild(btn);
+  }
+}
+
+function setTeamCount(n){
+  if(n === teamCount) return;
+
+  if(n > teams.length){
+    while(teams.length < n){
+      teams.push({ name: "", animal: "", score: 0 });
+    }
+  } else {
+    teams = teams.slice(0, n);
+  }
+
+  teamCount = n;
+
+  renderTeamCountPicker();
+  renderTeamSetup();
+}
+
+/* =========================================================
+   SETUP UI: NAMA & MASKOT TIM
+========================================================= */
+function renderTeamSetup(){
+  const grid = document.getElementById("teamSetupGrid");
+  grid.innerHTML = "";
+
+  teams.forEach((team, idx) => {
+    const box = document.createElement("div");
+    box.className = "team-setup-box" + (team.name && team.animal ? " filled" : "");
+
+    box.innerHTML = `
+      <label>Tim ${idx + 1}</label>
+      <input class="team-name-input" placeholder="Nama tim ${idx + 1}" value="${team.name}" oninput="updateTeamName(${idx}, this.value)">
+      <div class="animal-grid" id="animalGrid${idx}"></div>
+    `;
+
+    grid.appendChild(box);
+
+    const animalGrid = box.querySelector(`#animalGrid${idx}`);
+    ANIMALS.forEach(animal => {
+      const takenByOther = teams.some((t, i) => i !== idx && t.animal === animal);
+      const opt = document.createElement("div");
+      opt.className = "animal-option"
+        + (team.animal === animal ? " selected" : "")
+        + (takenByOther ? " taken" : "");
+      opt.textContent = animal;
+      if(!takenByOther){
+        opt.onclick = () => selectAnimal(idx, animal);
+      }
+      animalGrid.appendChild(opt);
+    });
+  });
+
+  checkStartReady();
+}
+
+function updateTeamName(idx, value){
+  teams[idx].name = value.trim();
+  checkStartReady();
+}
+
+function selectAnimal(idx, animal){
+  teams[idx].animal = teams[idx].animal === animal ? "" : animal;
+  renderTeamSetup();
+}
+
+function checkStartReady(){
+  const ready = teams.length >= MIN_TEAMS && teams.every(t => t.name && t.animal);
+  document.getElementById("startBtn").disabled = !ready;
+}
+
+/* =========================================================
+   MULAI GAME
+========================================================= */
+function startGame(){
+  teams.forEach(t => t.score = 0);
+
+  buildCardDeck();
+
+  currentPickerIndex = 0;
+  cardsUsedCount = 0;
+
+  document.getElementById("setupScreen").style.display = "none";
+  document.getElementById("gameContainer").style.display = "block";
+  document.getElementById("logList").innerHTML = "";
+
+  document.getElementById("scoreboard").style.gridTemplateColumns = `repeat(${teams.length}, 1fr)`;
+
+  renderScoreboard();
+  renderBoard();
+  updateTurnBadge();
+}
+
+function shuffleArray(arr){
+  const a = [...arr];
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildCardDeck(){
+  const pool = [
+    ...poinQuestions.map(q => ({ type: "poin", ...q })),
+    ...stealQuestions.map(q => ({ type: "steal", ...q })),
+    ...trapQuestions.map(q => ({ type: "trap", ...q }))
+  ];
+
+  const shuffled = shuffleArray(pool);
+
+  cards = shuffled.map((q, i) => ({
+    id: i + 1,
+    type: q.type,
+    value: q.value,
+    question: q.question,
+    options: q.options,
+    answer: q.answer,
+    used: false
+  }));
+}
+
+/* =========================================================
+   RENDER SCOREBOARD & BOARD
+========================================================= */
+function renderScoreboard(){
+  const box = document.getElementById("scoreboard");
+  box.innerHTML = "";
+
+  teams.forEach((team, idx) => {
+    const div = document.createElement("div");
+    div.className = "team-score-card" + (idx === currentPickerIndex ? " active-turn" : "");
+    div.innerHTML = `
+      <div class="mascot">${team.animal}</div>
+      <div class="tname">${escapeHtml(team.name)}</div>
+      <div class="tscore">${team.score}</div>
+    `;
+    box.appendChild(div);
+  });
+}
+
+function renderBoard(){
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+
+  cards.forEach(card => {
+    const el = document.createElement("div");
+    el.className = "card-slot" + (card.used ? " used" : "");
+
+    if(card.used){
+      const badge = { poin: "💰", steal: "🦹", trap: "💀" }[card.type];
+      el.innerHTML = `<div class="type-badge">${badge}</div><div class="qmark">✔️</div><div class="cnum">Kartu ${card.id}</div>`;
+    } else {
+      el.innerHTML = `<div class="qmark">❓</div><div class="cnum">Kartu ${card.id}</div>`;
+      el.onclick = () => openCard(card.id);
+    }
+
+    board.appendChild(el);
+  });
+}
+
+function updateTurnBadge(){
+  const team = teams[currentPickerIndex];
+  document.getElementById("turnBadge").textContent =
+    `Giliran memilih: ${team.animal} ${team.name}`;
+}
+
+/* =========================================================
+   ALUR KARTU: PILIH -> PUTUSKAN -> BUKA -> JAWAB
+========================================================= */
+function openCard(cardId){
+  pendingCardId = cardId;
+  sfxCardOpen();
+  showDecisionModal();
+}
+
+function showDecisionModal(){
+  const picker = teams[currentPickerIndex];
+
+  let html = `
+    <h2>❓ Kartu ${pendingCardId} Dipilih!</h2>
+    <p class="sub">Kartu ini masih rahasia. <strong>${picker.animal} ${escapeHtml(picker.name)}</strong>, jawab sendiri atau lempar ke tim lain?</p>
+    <div class="decision-btns">
+      <button class="decision-btn self" onclick="chooseAnswerer(${currentPickerIndex})">
+        🙋 Jawab Sendiri (${picker.animal} ${escapeHtml(picker.name)})
+      </button>
+  `;
+
+  teams.forEach((team, idx) => {
+    if(idx !== currentPickerIndex){
+      html += `
+        <button class="decision-btn" onclick="chooseAnswerer(${idx})">
+          🎯 Lempar ke ${team.animal} ${escapeHtml(team.name)}
+        </button>
+      `;
+    }
+  });
+
+  html += `</div>`;
+
+  document.getElementById("modalCard").innerHTML = html;
+  document.getElementById("modal").classList.add("show");
+}
+
+function chooseAnswerer(idx){
+  answererIndex = idx;
+  revealedCard = cards.find(c => c.id === pendingCardId);
+  sfxDecision();
+  showQuestionModal();
+}
+
+function showQuestionModal(){
+  const card = revealedCard;
+  const answerer = teams[answererIndex];
+
+  const typeLabel = { poin: "💰 Kartu Poin", steal: "🦹 Kartu Rebut Poin", trap: "💀 Kartu Jebakan" }[card.type];
+  const typeDesc = {
+    poin: `Jawab benar untuk mendapatkan ${card.value} poin.`,
+    steal: `Jawab benar dan kamu bisa merebut ${card.value} poin dari tim lain!`,
+    trap: `Awas! Kalau jawaban salah, poin tim ini akan dikurangi ${card.value} dan dibagi ke tim lain.`
+  }[card.type];
+
+  let html = `
+    <div class="type-banner ${card.type}">${typeLabel}</div>
+    <p class="sub">${typeDesc}</p>
+
+    <div class="quiz-case">
+      <strong>🎯 Yang menjawab:</strong> ${answerer.animal} ${escapeHtml(answerer.name)}
+    </div>
+
+    <div class="quiz-question">${card.question}</div>
+  `;
+
+  card.options.forEach((opt, idx) => {
+    html += `
+      <button class="quiz-option" onclick="answerCard(${idx})">
+        ${String.fromCharCode(65 + idx)}. ${opt}
+      </button>
+    `;
+  });
+
+  document.getElementById("modalCard").innerHTML = html;
+}
+
+/* =========================================================
+   PROSES JAWABAN
+========================================================= */
+function answerCard(selectedIdx){
+  const card = revealedCard;
+  const isCorrect = selectedIdx === card.answer;
+
+  document.querySelectorAll(".quiz-option").forEach((btn, idx) => {
+    btn.disabled = true;
+    if(idx === card.answer) btn.classList.add("correct");
+    if(idx === selectedIdx && !isCorrect) btn.classList.add("wrong");
+  });
+
+  card.used = true;
+  cardsUsedCount++;
+
+  const answerer = teams[answererIndex];
+
+  if(card.type === "poin"){
+    handlePoinResult(isCorrect, card, answerer, selectedIdx);
+  } else if(card.type === "steal"){
+    if(isCorrect){
+      sfxCorrect();
+      showStealTargetChoice(card, answerer, selectedIdx);
+      return;
+    } else {
+      sfxWrong();
+      appendResultBox(
+        "neutral",
+        `😅 Jawaban salah. Tidak ada poin yang didapat, dan kesempatan merebut poin hilang untuk kartu ini.${explanationHtml(card, selectedIdx)}`
+      );
+      logAction(`🦹 ${answerer.animal} ${answerer.name} menjawab salah kartu rebut. Tidak ada perubahan poin.`, "log-wrong");
+      showFinishStepButton();
+    }
+  } else if(card.type === "trap"){
+    handleTrapResult(isCorrect, card, answerer, selectedIdx);
+  }
+}
+
+/*
+   Membuat potongan HTML penjelasan: menyebutkan jawaban
+   yang benar (kalau tadi salah) beserta alasan singkatnya,
+   supaya pemain langsung tahu kenapa benar/salah.
+*/
+function explanationHtml(card, selectedIdx){
+  const isCorrect = selectedIdx === card.answer;
+  const correctText = escapeHtml(card.options[card.answer]);
+  const reason = escapeHtml(card.explanation || "");
+
+  if(isCorrect){
+    return `
+      <div class="quiz-explanation">
+        💡 <strong>Kenapa jawaban ini benar:</strong> ${reason}
+      </div>
+    `;
+  }
+
+  const yourText = escapeHtml(card.options[selectedIdx]);
+
+  return `
+    <div class="quiz-explanation">
+      ❌ <strong>Kenapa "${yourText}" salah:</strong> itu bukan jawaban yang dimaksud materi ini.<br>
+      ✅ <strong>Jawaban yang benar: ${correctText}.</strong> ${reason}
+    </div>
+  `;
+}
+
+function handlePoinResult(isCorrect, card, answerer, selectedIdx){
+  if(isCorrect){
+    sfxCorrect();
+    answerer.score += card.value;
+    appendResultBox("good", `✅ Benar! ${answerer.animal} ${escapeHtml(answerer.name)} mendapat <strong>${card.value} poin</strong>.${explanationHtml(card, selectedIdx)}`);
+    logAction(`💰 ${answerer.animal} ${answerer.name} menjawab benar (+${card.value} poin).`, "log-correct");
+  } else {
+    sfxWrong();
+    appendResultBox("bad", `❌ Jawaban salah. Tidak ada poin yang didapat.${explanationHtml(card, selectedIdx)}`);
+    logAction(`💰 ${answerer.animal} ${answerer.name} menjawab salah kartu poin. Tidak dapat poin.`, "log-wrong");
+  }
+  showFinishStepButton();
+}
+
+function handleTrapResult(isCorrect, card, answerer, selectedIdx){
+  if(isCorrect){
+    sfxCorrect();
+    appendResultBox("good", `🛡️ Selamat! ${answerer.animal} ${escapeHtml(answerer.name)} berhasil menghindari jebakan. Tidak ada poin yang hilang.${explanationHtml(card, selectedIdx)}`);
+    logAction(`💀 ${answerer.animal} ${answerer.name} menjawab benar kartu jebakan. Aman!`, "log-correct");
+  } else {
+    sfxTrap();
+
+    const others = teams.filter((t, i) => i !== answererIndex);
+    const share = Math.floor(card.value / others.length);
+    const remainder = card.value - (share * others.length);
+
+    answerer.score -= card.value;
+
+    others.forEach((t, i) => {
+      t.score += share + (i === 0 ? remainder : 0);
+    });
+
+    const otherNames = others.map((t, i) => `${t.animal} ${t.name} (+${share + (i === 0 ? remainder : 0)})`).join(", ");
+
+    appendResultBox(
+      "bad",
+      `💀 Kena jebakan! ${answerer.animal} ${escapeHtml(answerer.name)} kehilangan <strong>${card.value} poin</strong>, dibagikan ke: ${otherNames}.${explanationHtml(card, selectedIdx)}`
+    );
+    logAction(`💀 ${answerer.animal} ${answerer.name} kena jebakan, -${card.value} poin dibagi ke tim lain.`, "log-trap");
+  }
+  showFinishStepButton();
+}
+
+function showStealTargetChoice(card, answerer, selectedIdx){
+  let html = `
+    <div class="type-banner steal">🦹 Kartu Rebut Poin</div>
+    <p class="sub">✅ Jawaban benar! ${answerer.animal} ${escapeHtml(answerer.name)} bisa merebut hingga <strong>${card.value} poin</strong> dari tim lain. Pilih target:</p>
+    ${explanationHtml(card, selectedIdx)}
+  `;
+
+  teams.forEach((t, idx) => {
+    if(idx !== answererIndex){
+      html += `
+        <button class="steal-target-btn" onclick="doSteal(${idx})">
+          🎯 ${t.animal} ${escapeHtml(t.name)} — Poin saat ini: ${t.score}
+        </button>
+      `;
+    }
+  });
+
+  document.getElementById("modalCard").innerHTML = html;
+}
+
+function doSteal(targetIdx){
+  const card = revealedCard;
+  const answerer = teams[answererIndex];
+  const target = teams[targetIdx];
+
+  const amount = Math.min(card.value, target.score);
+
+  target.score -= amount;
+  answerer.score += amount;
+
+  sfxSteal();
+
+  appendResultBox(
+    "good",
+    `🦹 ${answerer.animal} ${escapeHtml(answerer.name)} berhasil merebut <strong>${amount} poin</strong> dari ${target.animal} ${escapeHtml(target.name)}!`
+  );
+
+  logAction(`🦹 ${answerer.animal} ${answerer.name} merebut ${amount} poin dari ${target.animal} ${target.name}.`, "log-steal");
+
+  showFinishStepButton();
+}
+
+/* =========================================================
+   UI HELPER: RESULT BOX & TOMBOL LANJUT
+========================================================= */
+function appendResultBox(type, message){
+  const box = document.createElement("div");
+  box.className = `result-box ${type}`;
+  box.innerHTML = message;
+  document.getElementById("modalCard").appendChild(box);
+}
+
+function showFinishStepButton(){
+  const btn = document.createElement("button");
+  btn.className = "modal-next-btn";
+  btn.textContent = "Lanjut →";
+  btn.onclick = closeCardFlow;
+  document.getElementById("modalCard").appendChild(btn);
+}
+
+function closeCardFlow(){
+  document.getElementById("modal").classList.remove("show");
+
+  renderScoreboard();
+  renderBoard();
+
+  currentPickerIndex = (currentPickerIndex + 1) % teams.length;
+  updateTurnBadge();
+  renderScoreboard();
+
+  if(cardsUsedCount >= cards.length){
+    setTimeout(showFinalRanking, 300);
+  }
+}
+
+/* =========================================================
+   LOG PERMAINAN
+========================================================= */
+function logAction(text, cssClass){
+  const list = document.getElementById("logList");
+  const item = document.createElement("div");
+  item.className = `log-item ${cssClass}`;
+  item.textContent = text;
+  list.prepend(item);
+}
+
+/* =========================================================
+   RANKING AKHIR
+========================================================= */
+function showFinalRanking(){
+  sfxWin();
+
+  const sorted = [...teams].sort((a, b) => b.score - a.score);
+  const medals = ["🥇","🥈","🥉","🎖️"];
+
+  let html = `
+    <h2>🏆 Permainan Selesai!</h2>
+    <p class="sub">Semua 20 kartu sudah dibuka. Berikut peringkat akhir:</p>
+    <div class="final-rank">
+  `;
+
+  sorted.forEach((team, idx) => {
+    html += `
+      <div class="final-rank-item">
+        <div class="medal">${medals[idx] || "🏅"}</div>
+        <div class="mascot2">${team.animal}</div>
+        <div class="fname">${escapeHtml(team.name)}</div>
+        <div class="fscore">${team.score} poin</div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  html += `<button class="modal-next-btn" onclick="restartToSetup()">🔄 Main Lagi</button>`;
+
+  document.getElementById("modalCard").innerHTML = html;
+  document.getElementById("modal").classList.add("show");
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+function confirmReset(){
+  if(confirm("Yakin ingin mengulang permainan dari awal? Skor saat ini akan hilang.")){
+    restartToSetup();
+  }
+}
+
+function restartToSetup(){
+  document.getElementById("modal").classList.remove("show");
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("setupScreen").style.display = "flex";
+
+  teams.forEach(t => { t.score = 0; });
+
+  renderTeamCountPicker();
+  renderTeamSetup();
+}
+
+/* =========================================================
+   UTIL
+========================================================= */
+function escapeHtml(text){
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+renderTeamCountPicker();
+renderTeamSetup();
+updateSoundButton();
+
+</script>
+</body>
+</html>
